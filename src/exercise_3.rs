@@ -23,5 +23,24 @@ pub fn a() -> usize {
 }
 
 pub fn b() -> usize {
-    0
+    let re = Regex::new(r"mul\(\d{1,3},\d{1,3}\)|do\(\)|don't\(\)").unwrap();
+    let text = misc::text();
+
+    let mut enabled = true;
+    re.find_iter(&text)
+        .map(|result| {
+            let result = result.as_str();
+
+            if result == "don't()" {
+                enabled = false;
+            } else if result == "do()" {
+                enabled = true;
+            } else if enabled {
+                let (l, r) = result.split_once(",").unwrap();
+                return strip_numbers(l) * strip_numbers(r);
+            }
+
+            0
+        })
+        .sum()
 }
