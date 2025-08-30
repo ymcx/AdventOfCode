@@ -1,28 +1,35 @@
 use crate::misc;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
-fn parse_rules(rules_str: &str) -> HashMap<&str, HashSet<&str>> {
+fn parse_rules(rules_str: &str) -> HashMap<&str, Vec<&str>> {
     let mut rules = HashMap::new();
     rules_str.lines().for_each(|rule| {
         let (left, right) = rule.split_once("|").unwrap();
-        rules.entry(left).or_insert_with(HashSet::new).insert(right);
+        rules.entry(left).or_insert_with(Vec::new).push(right);
     });
 
     rules
 }
 
-fn is_valid_update(update: &str, rules: &HashMap<&str, HashSet<&str>>) -> bool {
-    let update_levels: Vec<_> = update.split(",").collect();
-    for i in 1..update_levels.len() {
-        let current_rules = rules.get(update_levels[i]).unwrap();
-        for level in update_levels.iter().take(i) {
-            if current_rules.contains(*level) {
-                return false;
+fn invalid_update(
+    update: &Vec<String>,
+    rules: &HashMap<&str, Vec<&str>>,
+) -> Option<(usize, String)> {
+    for i in 1..update.len() {
+        let current_level = update[i].to_string();
+        if let Some(current_rules) = rules.get(current_level.as_str()) {
+            for level in update.iter().take(i) {
+                if !current_rules.contains(&level.as_str()) {
+                    continue;
+                }
+
+                let invalid_level = (i, current_level);
+                return Some(invalid_level);
             }
         }
     }
 
-    true
+    None
 }
 
 pub fn a() -> usize {
@@ -33,17 +40,40 @@ pub fn a() -> usize {
     updates
         .lines()
         .map(|update| {
-            if !is_valid_update(update, &rules) {
+            let update = update.split(",").map(String::from).collect();
+            if invalid_update(&update, &rules).is_some() {
                 return 0;
             }
 
-            let levels: Vec<_> = update.split(",").collect();
-            let middle = levels.len() / 2;
-            levels[middle].parse().unwrap()
+            let middle = update.len() / 2;
+            update[middle].parse().unwrap()
         })
         .sum()
 }
 
 pub fn b() -> usize {
-    0
+    let text = misc::text();
+    let (rules, updates) = text.trim().split_once("\n\n").unwrap();
+    let rules = parse_rules(rules);
+
+    updates
+        .lines()
+        .map(|update| {
+            let mut update = update.split(",").map(String::from).collect();
+            let mut changed = false;
+
+            while let Some((i, level)) = invalid_update(&update, &rules) {
+                update.remove(i);
+                update.insert(i - 1, level);
+                changed = true;
+            }
+
+            if changed {
+                let middle = update.len() / 2;
+                return update[middle].parse().unwrap();
+            }
+
+            0
+        })
+        .sum()
 }
