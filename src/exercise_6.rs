@@ -54,15 +54,15 @@ fn parse_obstacles(board: &Vec<Vec<char>>) -> (Vec<(i32, i32)>, (i32, i32)) {
     (obstacles, start_position)
 }
 
-fn unique_location_amount(history: &HashSet<((i32, i32), (i32, i32))>) -> usize {
-    history.iter().map(|(i, _)| i).collect::<HashSet<_>>().len()
+fn unique_locations(history: &HashSet<((i32, i32), (i32, i32))>) -> HashSet<(i32, i32)> {
+    history.iter().map(|(i, _)| *i).collect()
 }
 
 fn travel(
     start_position: (i32, i32),
     dimensions: (i32, i32),
     obstacles: &Vec<(i32, i32)>,
-) -> usize {
+) -> HashSet<(i32, i32)> {
     let mut position = start_position;
     let mut direction = Direction::Up;
     let mut history = HashSet::new();
@@ -71,7 +71,7 @@ fn travel(
     loop {
         let position_with_direction = (position, direction.get());
         if history.contains(&position_with_direction) {
-            return 0;
+            return HashSet::new();
         }
         history.insert(position_with_direction);
 
@@ -81,7 +81,7 @@ fn travel(
         );
         let (y, x) = new_position;
         if y < 0 || x < 0 || max_y <= y || max_x <= x {
-            return unique_location_amount(&history);
+            return unique_locations(&history);
         }
 
         if obstacles.contains(&new_position) {
@@ -97,12 +97,13 @@ pub fn a() -> usize {
     let (board, dimensions) = parse_board();
     let (obstacles, start_position) = parse_obstacles(&board);
 
-    travel(start_position, dimensions, &obstacles)
+    travel(start_position, dimensions, &obstacles).len()
 }
 
 pub fn b() -> usize {
     let (board, dimensions) = parse_board();
     let (obstacles, start_position) = parse_obstacles(&board);
+    let route = travel(start_position, dimensions, &obstacles);
 
     board
         .iter()
@@ -110,19 +111,19 @@ pub fn b() -> usize {
         .map(|(y, row)| {
             row.iter()
                 .enumerate()
-                .filter(|(x, char)| {
-                    if "^#".contains(**char) {
+                .filter(|(x, _)| {
+                    let new_obstacle = (y as i32, *x as i32);
+                    if !route.contains(&new_obstacle) {
                         return false;
                     }
 
-                    let new_obstacle = (y as i32, *x as i32);
                     let new_obstacles = obstacles
                         .iter()
                         .cloned()
                         .chain(std::iter::once(new_obstacle))
                         .collect();
 
-                    travel(start_position, dimensions, &new_obstacles) == 0
+                    travel(start_position, dimensions, &new_obstacles).len() == 0
                 })
                 .count()
         })

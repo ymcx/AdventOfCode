@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 mod exercise_1;
 mod exercise_10;
 mod exercise_11;
@@ -26,6 +28,7 @@ mod exercise_9;
 mod misc;
 
 fn main() {
+    let time = Instant::now();
     let args = misc::args();
     let exercise = args[1].as_str();
     let result = match exercise {
@@ -82,5 +85,5 @@ fn main() {
         _ => panic!(),
     };
 
-    println!("{}", result);
+    println!("{}\n{:?}", result, time.elapsed());
 }
