@@ -50,5 +50,28 @@ pub fn a() -> usize {
 }
 
 pub fn b() -> usize {
-    0
+    let (antennas, dimensions) = parse_board();
+    let (y_max, x_max) = dimensions;
+
+    let mut antidotes = HashSet::new();
+    for (_, antennas) in antennas {
+        for first in antennas.iter() {
+            for second in antennas.iter() {
+                if first == second {
+                    continue;
+                }
+
+                let delta = (second.0 - first.0, second.1 - first.1);
+                let mut antidote = *second;
+                let (mut y, mut x) = antidote;
+                while y >= 0 && x >= 0 && y_max > y && x_max > x {
+                    antidotes.insert(antidote);
+                    antidote = (y + delta.0, x + delta.1);
+                    (y, x) = antidote;
+                }
+            }
+        }
+    }
+
+    antidotes.len()
 }
