@@ -43,5 +43,56 @@ pub fn a() -> usize {
 }
 
 pub fn b() -> usize {
-    0
+    let text = misc::text();
+    let mut text: Vec<(i32, usize)> = text
+        .trim()
+        .chars()
+        .enumerate()
+        .map(|(i, char)| {
+            let value = if i % 2 == 0 { i as i32 / 2 } else { -1 };
+            let length = char.to_digit(10).unwrap() as usize;
+            (value, length)
+        })
+        .collect();
+
+    let mut i = text.len();
+    while i > 0 {
+        i -= 1;
+
+        let (value, length) = text[i];
+        if value == -1 {
+            continue;
+        }
+
+        for j in 0..i {
+            let (slot_value, slot_length) = text[j];
+            if slot_value == -1 && slot_length >= length {
+                text[j] = (value, length);
+                text[i] = (-1, length);
+                if slot_length > length {
+                    let new_slot = (-1, slot_length - length);
+                    text.insert(j + 1, new_slot);
+                }
+                break;
+            }
+        }
+    }
+
+    let mut i = 0;
+    text.iter()
+        .map(|&(value, length)| {
+            if value == -1 {
+                i += length;
+                return 0;
+            }
+
+            (0..length)
+                .map(|_| {
+                    let j = i * value as usize;
+                    i += 1;
+                    j
+                })
+                .sum()
+        })
+        .sum()
 }
