@@ -1,37 +1,49 @@
 use crate::misc;
+use std::collections::HashMap;
 
-fn do_blink(stones: &Vec<usize>) -> Vec<usize> {
-    let mut new_stones = Vec::new();
-    for i in 0..stones.len() {
-        let stone = stones[i];
+fn do_blink(stones: &HashMap<usize, usize>) -> HashMap<usize, usize> {
+    let mut stones_new = HashMap::new();
+    for (&stone, &amount) in stones {
+        if stone == 0 {
+            *stones_new.entry(1).or_insert(0) += amount;
+            continue;
+        }
+
         let stone_str = stone.to_string();
-        let some_stones = if stone == 0 {
-            vec![1]
-        } else if stone_str.len() % 2 == 0 {
+        if stone_str.len() % 2 == 0 {
             let (l, r) = stone_str.split_at(stone_str.len() / 2);
             let (l, r) = (l.parse().unwrap(), r.parse().unwrap());
-            vec![l, r]
-        } else {
-            vec![stone * 2024]
-        };
+            *stones_new.entry(l).or_insert(0) += amount;
+            *stones_new.entry(r).or_insert(0) += amount;
+            continue;
+        }
 
-        new_stones.extend(some_stones);
+        *stones_new.entry(stone * 2024).or_insert(0) += amount;
     }
 
-    new_stones
+    stones_new
 }
 
-pub fn a() -> usize {
+fn amount(blinks: usize) -> usize {
     let text = misc::text();
-    let mut stones = text.trim().split(" ").map(|i| i.parse().unwrap()).collect();
+    let mut stones = HashMap::new();
 
-    for _ in 0..25 {
+    text.trim().split(" ").for_each(|num| {
+        let num = num.parse().unwrap();
+        *stones.entry(num).or_insert(0) += 1;
+    });
+
+    for _ in 0..blinks {
         stones = do_blink(&stones);
     }
 
-    stones.len()
+    stones.values().sum()
+}
+
+pub fn a() -> usize {
+    amount(25)
 }
 
 pub fn b() -> usize {
-    0
+    amount(75)
 }
