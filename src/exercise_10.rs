@@ -54,11 +54,12 @@ fn find_paths(
     board: &Vec<Vec<i32>>,
     dimensions: (i32, i32),
     point: (i32, i32),
-) -> HashSet<(i32, i32)> {
+) -> (HashSet<(i32, i32)>, usize) {
     let (y, x) = point;
     let value = board[y as usize][x as usize];
     if value == 9 {
-        return [point].into_iter().collect();
+        let set = [point].into_iter().collect();
+        return (set, 1);
     }
 
     let next_points = vec![(y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)];
@@ -66,8 +67,10 @@ fn find_paths(
         .into_iter()
         .filter(|&next_point| is_legal_move(board, dimensions, point, next_point))
         .map(|next_point| find_paths(board, dimensions, next_point))
-        .flatten()
-        .collect()
+        .fold((HashSet::new(), 0), |(mut set, sum), (a, b)| {
+            set.extend(a);
+            (set, sum + b)
+        })
 }
 
 pub fn a() -> usize {
@@ -75,10 +78,21 @@ pub fn a() -> usize {
     let starting_points = find_starting_points(&board);
     starting_points
         .into_iter()
-        .map(|starting_point| find_paths(&board, dimensions, starting_point).len())
+        .map(|starting_point| {
+            let (set, _) = find_paths(&board, dimensions, starting_point);
+            set.len()
+        })
         .sum()
 }
 
 pub fn b() -> usize {
-    0
+    let (board, dimensions) = parse_board();
+    let starting_points = find_starting_points(&board);
+    starting_points
+        .into_iter()
+        .map(|starting_point| {
+            let (_, sum) = find_paths(&board, dimensions, starting_point);
+            sum
+        })
+        .sum()
 }
