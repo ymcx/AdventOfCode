@@ -5,7 +5,7 @@ fn parse_numbers(
     components: &mut Skip<Split<&str>>,
     first_trim: (&str, &str),
     second_trim: (&str, &str),
-) -> (i32, i32) {
+) -> (isize, isize) {
     (
         components
             .next()
@@ -24,7 +24,7 @@ fn parse_numbers(
     )
 }
 
-fn parse_machine(machine: &str) -> ((i32, i32), (i32, i32), (i32, i32)) {
+fn parse_machine(machine: &str) -> ((isize, isize), (isize, isize), (isize, isize)) {
     let mut parts = machine.split("\n").into_iter();
     let (mut a, mut b, mut prize) = (
         parts.next().unwrap().split(" ").skip(2),
@@ -38,7 +38,7 @@ fn parse_machine(machine: &str) -> ((i32, i32), (i32, i32), (i32, i32)) {
     )
 }
 
-fn gcd(a: i32, b: i32) -> (i32, i32, i32) {
+fn gcd(a: isize, b: isize) -> (isize, isize, isize) {
     if b == 0 {
         return (a, 1, 0);
     }
@@ -47,52 +47,48 @@ fn gcd(a: i32, b: i32) -> (i32, i32, i32) {
     (d, y, x - (a / b) * y)
 }
 
-fn find_solutions(a: i32, b: i32, c: i32) -> Vec<(i32, i32)> {
-    let (d, x, y) = gcd(a, b);
-    if c % d != 0 {
-        return Vec::new();
+fn find_solution(
+    a: (isize, isize),
+    b: (isize, isize),
+    prize: (isize, isize),
+    cost: (isize, isize),
+) -> usize {
+    let (d, x, y) = gcd(a.0, b.0);
+    let x = x * prize.0 / d;
+    let y = y * prize.0 / d;
+    let step_x = b.0 / d;
+    let step_y = a.0 / d;
+
+    let numerator = prize.1 - a.1 * x - b.1 * y;
+    let denominator = a.1 * step_x - b.1 * step_y;
+    if numerator % denominator != 0 {
+        return 0;
     }
 
-    let x = x * c / d;
-    let y = y * c / d;
-    let step_x = b / d;
-    let step_y = a / d;
-    let min = -x / step_x;
-    let max = y / step_y;
-
-    (min..=max)
-        .map(|t| (x + step_x * t, y - step_y * t))
-        .collect()
+    let x = x + step_x * numerator / denominator;
+    let y = y - step_y * numerator / denominator;
+    (cost.0 * x + cost.1 * y) as usize
 }
 
-pub fn a() -> usize {
-    let cost = (3, 1);
-    let machines: Vec<_> = misc::text()
+fn total_cost(offset: isize, cost: (isize, isize)) -> usize {
+    misc::text()
         .split("\n\n")
-        .map(|machine| parse_machine(machine))
-        .collect();
-
-    machines
-        .iter()
         .map(|machine| {
-            let (a, b, prize) = machine;
-            let x: Vec<_> = find_solutions(a.0, b.0, prize.0)
-                .into_iter()
-                .filter(|(x, y)| a.1 * x + b.1 * y == prize.1)
-                .collect();
-
-            if x.is_empty() {
-                return 0;
-            }
-
-            x.into_iter()
-                .map(|(a, b)| (cost.0 * a + cost.1 * b) as usize)
-                .min()
-                .unwrap()
+            let (a, b, prize) = parse_machine(machine);
+            let prize = (prize.0 + offset, prize.1 + offset);
+            find_solution(a, b, prize, cost)
         })
         .sum()
 }
 
+pub fn a() -> usize {
+    let offset = 0;
+    let cost = (3, 1);
+    total_cost(offset, cost)
+}
+
 pub fn b() -> usize {
-    0
+    let offset = isize::pow(10, 13);
+    let cost = (3, 1);
+    total_cost(offset, cost)
 }
