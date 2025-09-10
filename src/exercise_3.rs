@@ -10,9 +10,9 @@ fn strip_numbers(string: &str) -> usize {
         .unwrap()
 }
 
-pub fn a() -> usize {
+pub fn a(path: &str) -> usize {
     let re = Regex::new(r"mul\(\d{1,3},\d{1,3}\)").unwrap();
-    let text = misc::text();
+    let text = misc::text(path);
 
     re.find_iter(&text)
         .map(|result| {
@@ -22,9 +22,9 @@ pub fn a() -> usize {
         .sum()
 }
 
-pub fn b() -> usize {
+pub fn b(path: &str) -> usize {
     let re = Regex::new(r"mul\(\d{1,3},\d{1,3}\)|do\(\)|don't\(\)").unwrap();
-    let text = misc::text();
+    let text = misc::text(path);
 
     let mut enabled = true;
     re.find_iter(&text)
@@ -43,4 +43,10 @@ pub fn b() -> usize {
             0
         })
         .sum()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_3.txt") == 162813399);
+    assert!(b("input/exercise_3.txt") == 53783319);
 }

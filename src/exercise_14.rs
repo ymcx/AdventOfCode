@@ -10,8 +10,8 @@ fn parse_values(parts: &mut Split<&str>) -> SignedPoint {
         .unwrap()
 }
 
-fn parse_robots() -> Vec<(SignedPoint, SignedPoint)> {
-    misc::lines()
+fn parse_robots(path: &str) -> Vec<(SignedPoint, SignedPoint)> {
+    misc::lines(path)
         .map(|line| {
             let line = line.unwrap();
             let mut parts = line.split(" ");
@@ -73,16 +73,16 @@ fn contains_consecutive_columns(robots: &Vec<(SignedPoint, SignedPoint)>) -> boo
         != 0
 }
 
-pub fn a() -> usize {
-    let mut robots = parse_robots();
+pub fn a(path: &str) -> usize {
+    let mut robots = parse_robots(path);
     let dimensions = (101, 103);
 
     move_robots(&mut robots, dimensions, 100);
     safe_value(&robots, dimensions)
 }
 
-pub fn b() -> usize {
-    let mut robots = parse_robots();
+pub fn b(path: &str) -> usize {
+    let mut robots = parse_robots(path);
     let dimensions = (101, 103);
 
     for i in 0..10000 {
@@ -94,4 +94,10 @@ pub fn b() -> usize {
     }
 
     0
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_14.txt") == 224554908);
+    assert!(b("input/exercise_14.txt") == 6644);
 }

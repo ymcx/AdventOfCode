@@ -7,8 +7,7 @@ use std::{
 pub type Point = (usize, usize);
 pub type SignedPoint = (i32, i32);
 
-fn get_reader() -> BufReader<File> {
-    let path = args()[2].clone();
+fn get_reader(path: &str) -> BufReader<File> {
     let file = File::open(path).unwrap();
     BufReader::new(file)
 }
@@ -17,12 +16,12 @@ pub fn args() -> Vec<String> {
     env::args().collect()
 }
 
-pub fn lines() -> Lines<BufReader<File>> {
-    get_reader().lines()
+pub fn lines(path: &str) -> Lines<BufReader<File>> {
+    get_reader(path).lines()
 }
 
-pub fn text() -> String {
+pub fn text(path: &str) -> String {
     let mut text = String::new();
-    get_reader().read_to_string(&mut text).unwrap();
+    get_reader(path).read_to_string(&mut text).unwrap();
     text
 }

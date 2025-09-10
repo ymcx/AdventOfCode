@@ -32,8 +32,8 @@ fn invalid_update(
     None
 }
 
-pub fn a() -> usize {
-    let text = misc::text();
+pub fn a(path: &str) -> usize {
+    let text = misc::text(path);
     let (rules, updates) = text.trim().split_once("\n\n").unwrap();
     let rules = parse_rules(rules);
 
@@ -51,8 +51,8 @@ pub fn a() -> usize {
         .sum()
 }
 
-pub fn b() -> usize {
-    let text = misc::text();
+pub fn b(path: &str) -> usize {
+    let text = misc::text(path);
     let (rules, updates) = text.trim().split_once("\n\n").unwrap();
     let rules = parse_rules(rules);
 
@@ -76,4 +76,10 @@ pub fn b() -> usize {
             0
         })
         .sum()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_5.txt") == 5391);
+    assert!(b("input/exercise_5.txt") == 6142);
 }

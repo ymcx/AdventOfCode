@@ -11,8 +11,8 @@ fn create_mask(base: usize, seed: usize, length: usize) -> Vec<usize> {
         .collect()
 }
 
-fn parse_values() -> Vec<(usize, Vec<usize>)> {
-    misc::lines()
+fn parse_values(path: &str) -> Vec<(usize, Vec<usize>)> {
+    misc::lines(path)
         .map(|line| {
             let line = line.unwrap();
             let (test, values) = line.split_once(": ").unwrap();
@@ -23,8 +23,8 @@ fn parse_values() -> Vec<(usize, Vec<usize>)> {
         .collect()
 }
 
-fn get_result(base: usize) -> usize {
-    parse_values()
+fn get_result(path: &str, base: usize) -> usize {
+    parse_values(path)
         .iter()
         .map(|(test, values)| {
             let operator_places = values.len() - 1;
@@ -55,10 +55,16 @@ fn get_result(base: usize) -> usize {
         .sum()
 }
 
-pub fn a() -> usize {
-    get_result(2)
+pub fn a(path: &str) -> usize {
+    get_result(path, 2)
 }
 
-pub fn b() -> usize {
-    get_result(3)
+pub fn b(path: &str) -> usize {
+    get_result(path, 3)
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_7.txt") == 7710205485870);
+    assert!(b("input/exercise_7.txt") == 20928985450275);
 }

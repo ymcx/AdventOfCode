@@ -9,8 +9,11 @@ const DOWN: SignedPoint = (1, 0);
 const LEFT: SignedPoint = (0, -1);
 const RIGHT: SignedPoint = (0, 1);
 
-fn parse_board(large_board: bool) -> (HashMap<SignedPoint, u8>, SignedPoint, Vec<SignedPoint>) {
-    let mut text = misc::text();
+fn parse_board(
+    path: &str,
+    large_board: bool,
+) -> (HashMap<SignedPoint, u8>, SignedPoint, Vec<SignedPoint>) {
+    let mut text = misc::text(path);
     if large_board {
         text = text
             .replace("#", "##")
@@ -234,8 +237,8 @@ fn get_coordinates(obstacles: &HashMap<SignedPoint, u8>) -> usize {
         .sum::<i32>() as usize
 }
 
-pub fn a() -> usize {
-    let (mut obstacles, mut robot, movements) = parse_board(false);
+pub fn a(path: &str) -> usize {
+    let (mut obstacles, mut robot, movements) = parse_board(path, false);
     movements.iter().for_each(|movement| {
         move_robot(&mut obstacles, &mut robot, *movement);
     });
@@ -243,11 +246,17 @@ pub fn a() -> usize {
     get_coordinates(&obstacles)
 }
 
-pub fn b() -> usize {
-    let (mut obstacles, mut robot, movements) = parse_board(true);
+pub fn b(path: &str) -> usize {
+    let (mut obstacles, mut robot, movements) = parse_board(path, true);
     movements.iter().for_each(|movement| {
         move_robot_large(&mut obstacles, &mut robot, *movement);
     });
 
     get_coordinates(&obstacles)
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_15.txt") == 1430439);
+    assert!(b("input/exercise_15.txt") == 1458740);
 }

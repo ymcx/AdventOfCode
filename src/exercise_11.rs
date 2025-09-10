@@ -24,8 +24,8 @@ fn do_blink(stones: &HashMap<usize, usize>) -> HashMap<usize, usize> {
     stones_new
 }
 
-fn amount(blinks: usize) -> usize {
-    let text = misc::text();
+fn amount(path: &str, blinks: usize) -> usize {
+    let text = misc::text(path);
     let mut stones = HashMap::new();
 
     text.trim().split(" ").for_each(|num| {
@@ -40,10 +40,16 @@ fn amount(blinks: usize) -> usize {
     stones.values().sum()
 }
 
-pub fn a() -> usize {
-    amount(25)
+pub fn a(path: &str) -> usize {
+    amount(path, 25)
 }
 
-pub fn b() -> usize {
-    amount(75)
+pub fn b(path: &str) -> usize {
+    amount(path, 75)
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_11.txt") == 209412);
+    assert!(b("input/exercise_11.txt") == 248967696501656);
 }

@@ -70,8 +70,8 @@ fn find_solution(
     (cost.0 * x + cost.1 * y) as usize
 }
 
-fn total_cost(offset: isize, cost: (isize, isize)) -> usize {
-    misc::text()
+fn total_cost(path: &str, offset: isize, cost: (isize, isize)) -> usize {
+    misc::text(path)
         .split("\n\n")
         .map(|machine| {
             let (a, b, prize) = parse_machine(machine);
@@ -81,14 +81,20 @@ fn total_cost(offset: isize, cost: (isize, isize)) -> usize {
         .sum()
 }
 
-pub fn a() -> usize {
+pub fn a(path: &str) -> usize {
     let offset = 0;
     let cost = (3, 1);
-    total_cost(offset, cost)
+    total_cost(path, offset, cost)
 }
 
-pub fn b() -> usize {
+pub fn b(path: &str) -> usize {
     let offset = isize::pow(10, 13);
     let cost = (3, 1);
-    total_cost(offset, cost)
+    total_cost(path, offset, cost)
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_13.txt") == 29201);
+    assert!(b("input/exercise_13.txt") == 104140871044942);
 }

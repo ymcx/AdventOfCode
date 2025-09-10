@@ -1,11 +1,11 @@
 use crate::misc::{self, Point};
 use std::collections::{HashMap, HashSet};
 
-fn parse_walls() -> (HashSet<Point>, Point, Point) {
+fn parse_walls(path: &str) -> (HashSet<Point>, Point, Point) {
     let mut walls = HashSet::new();
     let mut start = (0, 0);
     let mut end = (0, 0);
-    for (y, row) in misc::lines().enumerate() {
+    for (y, row) in misc::lines(path).enumerate() {
         for (x, char) in row.unwrap().chars().enumerate() {
             let point = (y, x);
             match char {
@@ -110,16 +110,22 @@ fn calculate_cost(walls: &HashSet<Point>, start: Point, end: Point) -> (usize, H
     (min_cost, paths)
 }
 
-pub fn a() -> usize {
-    let (walls, start, end) = parse_walls();
+pub fn a(path: &str) -> usize {
+    let (walls, start, end) = parse_walls(path);
     let (cost, _) = calculate_cost(&walls, start, end);
 
     cost
 }
 
-pub fn b() -> usize {
-    let (walls, start, end) = parse_walls();
+pub fn b(path: &str) -> usize {
+    let (walls, start, end) = parse_walls(path);
     let (_, paths) = calculate_cost(&walls, start, end);
 
     paths.len()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_16.txt") == 101492);
+    assert!(b("input/exercise_16.txt") == 543);
 }

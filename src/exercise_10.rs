@@ -1,8 +1,8 @@
 use crate::misc::{self, SignedPoint};
 use std::collections::HashSet;
 
-fn parse_board() -> (Vec<Vec<i32>>, SignedPoint) {
-    let board: Vec<Vec<i32>> = misc::lines()
+fn parse_board(path: &str) -> (Vec<Vec<i32>>, SignedPoint) {
+    let board: Vec<Vec<i32>> = misc::lines(path)
         .map(|line| {
             line.unwrap()
                 .chars()
@@ -73,8 +73,8 @@ fn find_paths(
         })
 }
 
-pub fn a() -> usize {
-    let (board, dimensions) = parse_board();
+pub fn a(path: &str) -> usize {
+    let (board, dimensions) = parse_board(path);
     let starting_points = find_starting_points(&board);
     starting_points
         .into_iter()
@@ -85,8 +85,8 @@ pub fn a() -> usize {
         .sum()
 }
 
-pub fn b() -> usize {
-    let (board, dimensions) = parse_board();
+pub fn b(path: &str) -> usize {
+    let (board, dimensions) = parse_board(path);
     let starting_points = find_starting_points(&board);
     starting_points
         .into_iter()
@@ -95,4 +95,10 @@ pub fn b() -> usize {
             sum
         })
         .sum()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_10.txt") == 733);
+    assert!(b("input/exercise_10.txt") == 1514);
 }

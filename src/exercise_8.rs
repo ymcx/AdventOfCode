@@ -1,9 +1,9 @@
 use crate::misc::{self, SignedPoint};
 use std::collections::{HashMap, HashSet};
 
-fn parse_board() -> (HashMap<char, HashSet<SignedPoint>>, SignedPoint) {
+fn parse_board(path: &str) -> (HashMap<char, HashSet<SignedPoint>>, SignedPoint) {
     let mut antennas = HashMap::new();
-    let lines: Vec<String> = misc::lines().map(|i| i.unwrap()).collect();
+    let lines: Vec<String> = misc::lines(path).map(|i| i.unwrap()).collect();
     let dimensions = (lines.len() as i32, lines[0].len() as i32);
 
     lines.iter().enumerate().for_each(|(y, line)| {
@@ -23,8 +23,8 @@ fn parse_board() -> (HashMap<char, HashSet<SignedPoint>>, SignedPoint) {
     (antennas, dimensions)
 }
 
-pub fn a() -> usize {
-    let (antennas, dimensions) = parse_board();
+pub fn a(path: &str) -> usize {
+    let (antennas, dimensions) = parse_board(path);
     let (y_max, x_max) = dimensions;
 
     let mut antidotes = HashSet::new();
@@ -49,8 +49,8 @@ pub fn a() -> usize {
         .count()
 }
 
-pub fn b() -> usize {
-    let (antennas, dimensions) = parse_board();
+pub fn b(path: &str) -> usize {
+    let (antennas, dimensions) = parse_board(path);
     let (y_max, x_max) = dimensions;
 
     let mut antidotes = HashSet::new();
@@ -74,4 +74,10 @@ pub fn b() -> usize {
     }
 
     antidotes.len()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_8.txt") == 423);
+    assert!(b("input/exercise_8.txt") == 1287);
 }

@@ -74,8 +74,8 @@ fn travel(
         });
 }
 
-fn parse_board() -> (Vec<Vec<char>>, SignedPoint) {
-    let board: Vec<Vec<char>> = misc::lines()
+fn parse_board(path: &str) -> (Vec<Vec<char>>, SignedPoint) {
+    let board: Vec<Vec<char>> = misc::lines(path)
         .map(|line| line.unwrap().chars().collect())
         .collect();
     let dimensions = (board.len() as i32, board[0].len() as i32);
@@ -83,8 +83,8 @@ fn parse_board() -> (Vec<Vec<char>>, SignedPoint) {
     (board, dimensions)
 }
 
-fn price(first_exercise: bool) -> usize {
-    let (board, dimensions) = parse_board();
+fn price(path: &str, first_exercise: bool) -> usize {
+    let (board, dimensions) = parse_board(path);
     let (y_max, x_max) = dimensions;
     let mut total_travelled = HashSet::new();
     let mut price = 0;
@@ -122,10 +122,16 @@ fn price(first_exercise: bool) -> usize {
     price
 }
 
-pub fn a() -> usize {
-    price(true)
+pub fn a(path: &str) -> usize {
+    price(path, true)
 }
 
-pub fn b() -> usize {
-    price(false)
+pub fn b(path: &str) -> usize {
+    price(path, false)
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_12.txt") == 1415378);
+    assert!(b("input/exercise_12.txt") == 862714);
 }

@@ -1,6 +1,5 @@
-use std::io::Error;
-
 use crate::misc;
+use std::io::Error;
 
 fn is_sorted(values: &Vec<usize>) -> bool {
     values.is_sorted_by(|a, b| a <= b) || values.is_sorted_by(|a, b| a >= b)
@@ -21,8 +20,8 @@ fn collect_levels(line: &Result<String, Error>) -> Vec<usize> {
         .collect()
 }
 
-pub fn a() -> usize {
-    misc::lines()
+pub fn a(path: &str) -> usize {
+    misc::lines(path)
         .filter(|line| {
             let values = &collect_levels(line);
             is_sorted(values) && is_gradual(values)
@@ -30,8 +29,8 @@ pub fn a() -> usize {
         .count()
 }
 
-pub fn b() -> usize {
-    misc::lines()
+pub fn b(path: &str) -> usize {
+    misc::lines(path)
         .filter(|line| {
             let values = &collect_levels(line);
             (0..values.len())
@@ -46,4 +45,10 @@ pub fn b() -> usize {
                 .any(|v| is_sorted(&v) && is_gradual(&v))
         })
         .count()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_2.txt") == 549);
+    assert!(b("input/exercise_2.txt") == 589);
 }

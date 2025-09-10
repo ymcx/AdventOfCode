@@ -28,8 +28,8 @@ impl Direction {
     }
 }
 
-fn parse_board() -> (Vec<Vec<char>>, SignedPoint) {
-    let board: Vec<Vec<_>> = misc::lines()
+fn parse_board(path: &str) -> (Vec<Vec<char>>, SignedPoint) {
+    let board: Vec<Vec<_>> = misc::lines(path)
         .map(|line| line.unwrap().chars().collect())
         .collect();
     let dimensions = (board.len() as i32, board[0].len() as i32);
@@ -93,15 +93,15 @@ fn travel(
     }
 }
 
-pub fn a() -> usize {
-    let (board, dimensions) = parse_board();
+pub fn a(path: &str) -> usize {
+    let (board, dimensions) = parse_board(path);
     let (obstacles, start_position) = parse_obstacles(&board);
 
     travel(start_position, dimensions, &obstacles).len()
 }
 
-pub fn b() -> usize {
-    let (board, dimensions) = parse_board();
+pub fn b(path: &str) -> usize {
+    let (board, dimensions) = parse_board(path);
     let (obstacles, start_position) = parse_obstacles(&board);
     let route = travel(start_position, dimensions, &obstacles);
 
@@ -128,4 +128,10 @@ pub fn b() -> usize {
                 .count()
         })
         .sum()
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_6.txt") == 5067);
+    assert!(b("input/exercise_6.txt") == 1793);
 }

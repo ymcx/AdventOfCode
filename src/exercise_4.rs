@@ -49,9 +49,9 @@ fn found_pair(origin: (isize, isize), board: &Vec<Vec<char>>) -> bool {
     is_match(top_right, bottom_left) && is_match(bottom_right, top_left)
 }
 
-pub fn a() -> usize {
+pub fn a(path: &str) -> usize {
     let word = "XMAS";
-    let board: Vec<Vec<char>> = misc::text()
+    let board: Vec<Vec<char>> = misc::text(path)
         .trim()
         .split("\n")
         .map(|row| row.chars().collect())
@@ -80,8 +80,8 @@ pub fn a() -> usize {
     count
 }
 
-pub fn b() -> usize {
-    let board: Vec<Vec<char>> = misc::text()
+pub fn b(path: &str) -> usize {
+    let board: Vec<Vec<char>> = misc::text(path)
         .trim()
         .split("\n")
         .map(|row| row.chars().collect())
@@ -102,4 +102,10 @@ pub fn b() -> usize {
     }
 
     count
+}
+
+#[test]
+fn test() {
+    assert!(a("input/exercise_4.txt") == 2554);
+    assert!(b("input/exercise_4.txt") == 1916);
 }
