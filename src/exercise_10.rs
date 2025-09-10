@@ -1,7 +1,7 @@
-use crate::misc;
+use crate::misc::{self, SignedPoint};
 use std::collections::HashSet;
 
-fn parse_board() -> (Vec<Vec<i32>>, (i32, i32)) {
+fn parse_board() -> (Vec<Vec<i32>>, SignedPoint) {
     let board: Vec<Vec<i32>> = misc::lines()
         .map(|line| {
             line.unwrap()
@@ -15,7 +15,7 @@ fn parse_board() -> (Vec<Vec<i32>>, (i32, i32)) {
     (board, dimensions)
 }
 
-fn find_starting_points(board: &Vec<Vec<i32>>) -> Vec<(i32, i32)> {
+fn find_starting_points(board: &Vec<Vec<i32>>) -> Vec<SignedPoint> {
     let mut starting_points = Vec::new();
     board.iter().enumerate().for_each(|(y, line)| {
         line.iter().enumerate().for_each(|(x, char)| {
@@ -33,9 +33,9 @@ fn find_starting_points(board: &Vec<Vec<i32>>) -> Vec<(i32, i32)> {
 
 fn is_legal_move(
     board: &Vec<Vec<i32>>,
-    dimensions: (i32, i32),
-    point: (i32, i32),
-    next_point: (i32, i32),
+    dimensions: SignedPoint,
+    point: SignedPoint,
+    next_point: SignedPoint,
 ) -> bool {
     let (max_y, max_x) = dimensions;
     let (y, x) = point;
@@ -52,9 +52,9 @@ fn is_legal_move(
 
 fn find_paths(
     board: &Vec<Vec<i32>>,
-    dimensions: (i32, i32),
-    point: (i32, i32),
-) -> (HashSet<(i32, i32)>, usize) {
+    dimensions: SignedPoint,
+    point: SignedPoint,
+) -> (HashSet<SignedPoint>, usize) {
     let (y, x) = point;
     let value = board[y as usize][x as usize];
     if value == 9 {

@@ -1,15 +1,15 @@
-use crate::misc;
+use crate::misc::{self, SignedPoint};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 const BOX: u8 = 0;
 const WALL: u8 = 1;
 const BOX_R: u8 = 2;
-const UP: (i32, i32) = (-1, 0);
-const DOWN: (i32, i32) = (1, 0);
-const LEFT: (i32, i32) = (0, -1);
-const RIGHT: (i32, i32) = (0, 1);
+const UP: SignedPoint = (-1, 0);
+const DOWN: SignedPoint = (1, 0);
+const LEFT: SignedPoint = (0, -1);
+const RIGHT: SignedPoint = (0, 1);
 
-fn parse_board(large_board: bool) -> (HashMap<(i32, i32), u8>, (i32, i32), Vec<(i32, i32)>) {
+fn parse_board(large_board: bool) -> (HashMap<SignedPoint, u8>, SignedPoint, Vec<SignedPoint>) {
     let mut text = misc::text();
     if large_board {
         text = text
@@ -56,10 +56,10 @@ fn parse_board(large_board: bool) -> (HashMap<(i32, i32), u8>, (i32, i32), Vec<(
 }
 
 fn next_empty_space(
-    obstacles: &HashMap<(i32, i32), u8>,
-    robot: (i32, i32),
-    direction: (i32, i32),
-) -> Option<(i32, i32)> {
+    obstacles: &HashMap<SignedPoint, u8>,
+    robot: SignedPoint,
+    direction: SignedPoint,
+) -> Option<SignedPoint> {
     for i in 1..100 {
         let point = (robot.0 + direction.0 * i, robot.1 + direction.1 * i);
         match obstacles.get(&point) {
@@ -73,9 +73,9 @@ fn next_empty_space(
 }
 
 fn move_robot(
-    obstacles: &mut HashMap<(i32, i32), u8>,
-    robot: &mut (i32, i32),
-    direction: (i32, i32),
+    obstacles: &mut HashMap<SignedPoint, u8>,
+    robot: &mut SignedPoint,
+    direction: SignedPoint,
 ) {
     let next_point = (robot.0 + direction.0, robot.1 + direction.1);
     match obstacles.get(&next_point) {
@@ -92,9 +92,9 @@ fn move_robot(
 }
 
 fn move_robot_large(
-    obstacles: &mut HashMap<(i32, i32), u8>,
-    point: &mut (i32, i32),
-    direction: (i32, i32),
+    obstacles: &mut HashMap<SignedPoint, u8>,
+    point: &mut SignedPoint,
+    direction: SignedPoint,
 ) {
     let next = (point.0 + direction.0, point.1 + direction.1);
     if let Some(next) = match obstacles.get(&next) {
@@ -107,10 +107,10 @@ fn move_robot_large(
 }
 
 fn get_some_boxes_vertical(
-    obstacles: &HashMap<(i32, i32), u8>,
-    point: (i32, i32),
-    direction: (i32, i32),
-) -> Option<HashSet<(i32, i32)>> {
+    obstacles: &HashMap<SignedPoint, u8>,
+    point: SignedPoint,
+    direction: SignedPoint,
+) -> Option<HashSet<SignedPoint>> {
     let center = (point.0 + direction.0, point.1 + direction.1);
     let right = (center.0, center.1 + 1);
     let left = (center.0, center.1 - 1);
@@ -137,10 +137,10 @@ fn get_some_boxes_vertical(
 }
 
 fn get_boxes_vertical(
-    obstacles: &HashMap<(i32, i32), u8>,
-    point: (i32, i32),
-    direction: (i32, i32),
-) -> HashSet<(i32, i32)> {
+    obstacles: &HashMap<SignedPoint, u8>,
+    point: SignedPoint,
+    direction: SignedPoint,
+) -> HashSet<SignedPoint> {
     let mut boxes = HashSet::new();
     let mut queue = VecDeque::new();
     queue.push_back(point);
@@ -160,10 +160,10 @@ fn get_boxes_vertical(
 }
 
 fn get_boxes_horizontal(
-    obstacles: &HashMap<(i32, i32), u8>,
-    point: (i32, i32),
-    direction: (i32, i32),
-) -> HashSet<(i32, i32)> {
+    obstacles: &HashMap<SignedPoint, u8>,
+    point: SignedPoint,
+    direction: SignedPoint,
+) -> HashSet<SignedPoint> {
     let mut boxes = HashSet::new();
     boxes.insert(point);
 
@@ -186,7 +186,7 @@ fn get_boxes_horizontal(
     boxes
 }
 
-fn get_left_side(obstacles: &HashMap<(i32, i32), u8>, point: (i32, i32)) -> (i32, i32) {
+fn get_left_side(obstacles: &HashMap<SignedPoint, u8>, point: SignedPoint) -> SignedPoint {
     if obstacles.get(&point) == Some(&BOX) {
         point
     } else {
@@ -195,10 +195,10 @@ fn get_left_side(obstacles: &HashMap<(i32, i32), u8>, point: (i32, i32)) -> (i32
 }
 
 fn move_boxes(
-    obstacles: &mut HashMap<(i32, i32), u8>,
-    point: (i32, i32),
-    direction: (i32, i32),
-) -> Option<(i32, i32)> {
+    obstacles: &mut HashMap<SignedPoint, u8>,
+    point: SignedPoint,
+    direction: SignedPoint,
+) -> Option<SignedPoint> {
     let left = get_left_side(obstacles, point);
     let boxes = if direction == UP || direction == DOWN {
         get_boxes_vertical(obstacles, left, direction)
@@ -226,7 +226,7 @@ fn move_boxes(
     Some(point)
 }
 
-fn get_coordinates(obstacles: &HashMap<(i32, i32), u8>) -> usize {
+fn get_coordinates(obstacles: &HashMap<SignedPoint, u8>) -> usize {
     obstacles
         .iter()
         .filter(|(_, obstacle)| **obstacle == BOX)

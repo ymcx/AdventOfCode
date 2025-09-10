@@ -1,4 +1,4 @@
-use crate::misc;
+use crate::misc::{self, SignedPoint};
 use std::collections::HashSet;
 
 enum Direction {
@@ -9,7 +9,7 @@ enum Direction {
 }
 
 impl Direction {
-    pub fn get(&self) -> (i32, i32) {
+    pub fn get(&self) -> SignedPoint {
         match self {
             Self::Up => (-1, 0),
             Self::Down => (1, 0),
@@ -28,7 +28,7 @@ impl Direction {
     }
 }
 
-fn parse_board() -> (Vec<Vec<char>>, (i32, i32)) {
+fn parse_board() -> (Vec<Vec<char>>, SignedPoint) {
     let board: Vec<Vec<_>> = misc::lines()
         .map(|line| line.unwrap().chars().collect())
         .collect();
@@ -37,7 +37,7 @@ fn parse_board() -> (Vec<Vec<char>>, (i32, i32)) {
     (board, dimensions)
 }
 
-fn parse_obstacles(board: &Vec<Vec<char>>) -> (Vec<(i32, i32)>, (i32, i32)) {
+fn parse_obstacles(board: &Vec<Vec<char>>) -> (Vec<SignedPoint>, SignedPoint) {
     let mut start_position = (0, 0);
     let mut obstacles = Vec::new();
     for (y, row) in board.iter().enumerate() {
@@ -54,15 +54,15 @@ fn parse_obstacles(board: &Vec<Vec<char>>) -> (Vec<(i32, i32)>, (i32, i32)) {
     (obstacles, start_position)
 }
 
-fn unique_locations(history: &HashSet<((i32, i32), (i32, i32))>) -> HashSet<(i32, i32)> {
+fn unique_locations(history: &HashSet<(SignedPoint, SignedPoint)>) -> HashSet<SignedPoint> {
     history.iter().map(|(i, _)| *i).collect()
 }
 
 fn travel(
-    start_position: (i32, i32),
-    dimensions: (i32, i32),
-    obstacles: &Vec<(i32, i32)>,
-) -> HashSet<(i32, i32)> {
+    start_position: SignedPoint,
+    dimensions: SignedPoint,
+    obstacles: &Vec<SignedPoint>,
+) -> HashSet<SignedPoint> {
     let mut position = start_position;
     let mut direction = Direction::Up;
     let mut history = HashSet::new();

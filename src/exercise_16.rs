@@ -1,7 +1,5 @@
-use crate::misc;
+use crate::misc::{self, Point};
 use std::collections::{HashMap, HashSet};
-
-type Point = (usize, usize);
 
 fn parse_walls() -> (HashSet<Point>, Point, Point) {
     let mut walls = HashSet::new();

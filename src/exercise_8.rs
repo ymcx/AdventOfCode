@@ -1,7 +1,7 @@
-use crate::misc;
+use crate::misc::{self, SignedPoint};
 use std::collections::{HashMap, HashSet};
 
-fn parse_board() -> (HashMap<char, HashSet<(i32, i32)>>, (i32, i32)) {
+fn parse_board() -> (HashMap<char, HashSet<SignedPoint>>, SignedPoint) {
     let mut antennas = HashMap::new();
     let lines: Vec<String> = misc::lines().map(|i| i.unwrap()).collect();
     let dimensions = (lines.len() as i32, lines[0].len() as i32);

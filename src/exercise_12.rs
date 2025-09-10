@@ -1,7 +1,7 @@
-use crate::misc;
+use crate::misc::{self, SignedPoint};
 use std::collections::{HashMap, HashSet, VecDeque};
 
-fn groups(points: &HashSet<(i32, i32)>) -> usize {
+fn groups(points: &HashSet<SignedPoint>) -> usize {
     let mut unvisited = points.clone();
     let mut groups = 0;
 
@@ -26,11 +26,11 @@ fn groups(points: &HashSet<(i32, i32)>) -> usize {
 
 fn travel(
     board: &Vec<Vec<char>>,
-    travelled: &mut HashSet<(i32, i32)>,
-    borders: &mut HashMap<usize, HashSet<(i32, i32)>>,
-    dimensions: (i32, i32),
+    travelled: &mut HashSet<SignedPoint>,
+    borders: &mut HashMap<usize, HashSet<SignedPoint>>,
+    dimensions: SignedPoint,
     last_char: char,
-    point: (i32, i32),
+    point: SignedPoint,
     direction: usize,
 ) {
     if travelled.contains(&point) {
@@ -74,7 +74,7 @@ fn travel(
         });
 }
 
-fn parse_board() -> (Vec<Vec<char>>, (i32, i32)) {
+fn parse_board() -> (Vec<Vec<char>>, SignedPoint) {
     let board: Vec<Vec<char>> = misc::lines()
         .map(|line| line.unwrap().chars().collect())
         .collect();

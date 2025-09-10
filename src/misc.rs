@@ -4,6 +4,9 @@ use std::{
     io::{BufRead, BufReader, Lines, Read},
 };
 
+pub type Point = (usize, usize);
+pub type SignedPoint = (i32, i32);
+
 fn get_reader() -> BufReader<File> {
     let path = args()[2].clone();
     let file = File::open(path).unwrap();

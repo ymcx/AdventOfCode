@@ -1,8 +1,8 @@
-use crate::misc;
+use crate::misc::{self, SignedPoint};
 use itertools::Itertools;
 use std::str::Split;
 
-fn parse_values(parts: &mut Split<&str>) -> (i32, i32) {
+fn parse_values(parts: &mut Split<&str>) -> SignedPoint {
     parts.next().unwrap()[2..]
         .split(",")
         .map(|i| i.parse().unwrap())
@@ -10,7 +10,7 @@ fn parse_values(parts: &mut Split<&str>) -> (i32, i32) {
         .unwrap()
 }
 
-fn parse_robots() -> Vec<((i32, i32), (i32, i32))> {
+fn parse_robots() -> Vec<(SignedPoint, SignedPoint)> {
     misc::lines()
         .map(|line| {
             let line = line.unwrap();
@@ -20,7 +20,11 @@ fn parse_robots() -> Vec<((i32, i32), (i32, i32))> {
         .collect()
 }
 
-fn move_robots(robots: &mut Vec<((i32, i32), (i32, i32))>, dimensions: (i32, i32), seconds: i32) {
+fn move_robots(
+    robots: &mut Vec<(SignedPoint, SignedPoint)>,
+    dimensions: SignedPoint,
+    seconds: i32,
+) {
     let (x_max, y_max) = dimensions;
 
     robots.iter_mut().for_each(|(position, velocity)| {
@@ -31,7 +35,7 @@ fn move_robots(robots: &mut Vec<((i32, i32), (i32, i32))>, dimensions: (i32, i32
     });
 }
 
-fn safe_value(robots: &Vec<((i32, i32), (i32, i32))>, dimensions: (i32, i32)) -> usize {
+fn safe_value(robots: &Vec<(SignedPoint, SignedPoint)>, dimensions: SignedPoint) -> usize {
     let (x_max, y_max) = dimensions;
     let (x_mid, y_mid) = (x_max / 2, y_max / 2);
 
@@ -54,8 +58,8 @@ fn safe_value(robots: &Vec<((i32, i32), (i32, i32))>, dimensions: (i32, i32)) ->
     quadrants.iter().product()
 }
 
-fn contains_consecutive_columns(robots: &Vec<((i32, i32), (i32, i32))>) -> bool {
-    let positions: Vec<(i32, i32)> = robots.iter().map(|&(position, _)| position).collect();
+fn contains_consecutive_columns(robots: &Vec<(SignedPoint, SignedPoint)>) -> bool {
+    let positions: Vec<SignedPoint> = robots.iter().map(|&(position, _)| position).collect();
     positions
         .iter()
         .filter(|&&position| {
