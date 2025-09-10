@@ -26,12 +26,7 @@ fn parse_walls(path: &str) -> (HashSet<Point>, Point, Point) {
     (walls, start, end)
 }
 
-fn get_next_points(
-    walls: &HashSet<Point>,
-    visited: &HashMap<(Point, usize), usize>,
-    cost: usize,
-    point: Point,
-) -> Vec<(usize, Point)> {
+fn get_next_points(walls: &HashSet<Point>, point: Point) -> Vec<(usize, Point)> {
     [(0, 1), (-1, 0), (0, -1), (1, 0)]
         .into_iter()
         .enumerate()
@@ -41,11 +36,7 @@ fn get_next_points(
                 point.1.saturating_add_signed(delta.1),
             );
 
-            if walls.contains(&next_point)
-                || visited
-                    .get(&(next_point, next_direction))
-                    .map_or(false, |&old_cost| cost > old_cost)
-            {
+            if walls.contains(&next_point) {
                 return None;
             }
 
@@ -68,13 +59,13 @@ fn calculate_cost(walls: &HashSet<Point>, start: Point, end: Point) -> (usize, H
                 break;
             }
 
-            if let Some(&last_cost) = visited.get(&(point, direction)) {
-                if cost > last_cost {
+            if let Some(last_cost) = visited.get(&point) {
+                if cost > last_cost + 1000 {
                     break;
                 }
             }
 
-            visited.insert((point, direction), cost);
+            visited.insert(point, cost);
             path.insert(point);
 
             if point == end {
@@ -87,7 +78,7 @@ fn calculate_cost(walls: &HashSet<Point>, start: Point, end: Point) -> (usize, H
                 break;
             }
 
-            let next_points = get_next_points(walls, &visited, cost, point);
+            let next_points = get_next_points(walls, point);
             if next_points.len() == 0 {
                 break;
             }
