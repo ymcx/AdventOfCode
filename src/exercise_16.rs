@@ -1,11 +1,10 @@
 use crate::misc;
-use std::{
-    cmp,
-    collections::{HashMap, HashSet},
-};
+use std::collections::{HashMap, HashSet};
 
-fn parse_board() -> (HashSet<(usize, usize)>, (usize, usize), (usize, usize)) {
-    let mut board = HashSet::new();
+type Point = (usize, usize);
+
+fn parse_walls() -> (HashSet<Point>, Point, Point) {
+    let mut walls = HashSet::new();
     let mut start = (0, 0);
     let mut end = (0, 0);
     for (y, row) in misc::lines().enumerate() {
@@ -13,7 +12,7 @@ fn parse_board() -> (HashSet<(usize, usize)>, (usize, usize), (usize, usize)) {
             let point = (y, x);
             match char {
                 '#' => {
-                    board.insert(point);
+                    walls.insert(point);
                 }
                 'S' => {
                     start = point;
@@ -26,64 +25,79 @@ fn parse_board() -> (HashSet<(usize, usize)>, (usize, usize), (usize, usize)) {
         }
     }
 
-    (board, start, end)
+    (walls, start, end)
 }
 
-fn next_points(
-    board: &HashSet<(usize, usize)>,
-    point: (usize, usize),
-    steps: usize,
-    travelled: &HashMap<(usize, usize), usize>,
-) -> Vec<(usize, (usize, usize))> {
+fn get_next_points(
+    walls: &HashSet<Point>,
+    visited: &HashMap<(Point, usize), usize>,
+    cost: usize,
+    point: Point,
+) -> Vec<(usize, Point)> {
     [(0, 1), (-1, 0), (0, -1), (1, 0)]
         .into_iter()
         .enumerate()
-        .filter_map(|(direction, delta)| {
+        .filter_map(|(next_direction, delta)| {
             let next_point = (
                 point.0.saturating_add_signed(delta.0),
                 point.1.saturating_add_signed(delta.1),
             );
 
-            if board.contains(&next_point) {
+            if walls.contains(&next_point)
+                || visited
+                    .get(&(next_point, next_direction))
+                    .map_or(false, |&old_cost| cost > old_cost)
+            {
                 return None;
             }
 
-            if travelled.get(&next_point).map_or(true, |&s| steps < s) {
-                return Some((direction, next_point));
-            }
-
-            None
+            Some((next_direction, next_point))
         })
         .collect()
 }
 
-fn get_min_steps(
-    board: &HashSet<(usize, usize)>,
-    start: (usize, usize),
-    end: (usize, usize),
-) -> usize {
-    let mut players = vec![(start, 0, 0)];
-    let mut travelled = HashMap::new();
-    let mut min_steps = usize::MAX;
+fn calculate_cost(walls: &HashSet<Point>, start: Point, end: Point) -> (usize, HashSet<Point>) {
+    let mut players = vec![(start, 0, 0, HashSet::new())];
+    let mut visited = HashMap::new();
+    let mut min_cost = usize::MAX;
+    let mut paths = HashSet::new();
 
     while let Some(mut player) = players.pop() {
         loop {
-            let (point, direction, steps) = player;
-            travelled.insert(point, steps);
+            let (point, direction, cost, mut path) = player.clone();
 
-            if point == end {
-                min_steps = cmp::min(steps, min_steps);
+            if cost > min_cost {
                 break;
             }
 
-            let next_points = next_points(board, point, steps, &travelled);
+            if let Some(&last_cost) = visited.get(&(point, direction)) {
+                if cost > last_cost {
+                    break;
+                }
+            }
+
+            visited.insert((point, direction), cost);
+            path.insert(point);
+
+            if point == end {
+                if cost == min_cost {
+                    paths.extend(path);
+                } else {
+                    min_cost = cost;
+                    paths = path;
+                }
+                break;
+            }
+
+            let next_points = get_next_points(walls, &visited, cost, point);
             if next_points.len() == 0 {
                 break;
             }
 
             for (i, (next_direction, next_point)) in next_points.into_iter().enumerate() {
-                let next_steps = steps + if direction == next_direction { 1 } else { 1001 };
-                let next_player = (next_point, next_direction, next_steps);
+                let next_cost = cost + if direction == next_direction { 1 } else { 1001 };
+                let next_path = path.clone();
+                let next_player = (next_point, next_direction, next_cost, next_path);
 
                 if i == 0 {
                     player = next_player;
@@ -95,14 +109,19 @@ fn get_min_steps(
         }
     }
 
-    min_steps
+    (min_cost, paths)
 }
 
 pub fn a() -> usize {
-    let (board, start, end) = parse_board();
-    get_min_steps(&board, start, end)
+    let (walls, start, end) = parse_walls();
+    let (cost, _) = calculate_cost(&walls, start, end);
+
+    cost
 }
 
 pub fn b() -> usize {
-    0
+    let (walls, start, end) = parse_walls();
+    let (_, paths) = calculate_cost(&walls, start, end);
+
+    paths.len()
 }
