@@ -10,7 +10,7 @@ fn strip_numbers(string: &str) -> usize {
         .unwrap()
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let re = Regex::new(r"mul\(\d{1,3},\d{1,3}\)").unwrap();
     let text = misc::text(path);
 
@@ -19,10 +19,11 @@ pub fn a(path: &str) -> usize {
             let (l, r) = result.as_str().split_once(",").unwrap();
             strip_numbers(l) * strip_numbers(r)
         })
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let re = Regex::new(r"mul\(\d{1,3},\d{1,3}\)|do\(\)|don't\(\)").unwrap();
     let text = misc::text(path);
 
@@ -42,11 +43,12 @@ pub fn b(path: &str) -> usize {
 
             0
         })
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_3.txt") == 162813399);
-    assert!(b("input/exercise_3.txt") == 53783319);
+    assert!(a("input/exercise_3.txt") == "162813399");
+    assert!(b("input/exercise_3.txt") == "53783319");
 }

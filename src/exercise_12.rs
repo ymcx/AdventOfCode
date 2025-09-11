@@ -122,16 +122,16 @@ fn price(path: &str, first_exercise: bool) -> usize {
     price
 }
 
-pub fn a(path: &str) -> usize {
-    price(path, true)
+pub fn a(path: &str) -> String {
+    price(path, true).to_string()
 }
 
-pub fn b(path: &str) -> usize {
-    price(path, false)
+pub fn b(path: &str) -> String {
+    price(path, false).to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_12.txt") == 1415378);
-    assert!(b("input/exercise_12.txt") == 862714);
+    assert!(a("input/exercise_12.txt") == "1415378");
+    assert!(b("input/exercise_12.txt") == "862714");
 }

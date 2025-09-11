@@ -101,22 +101,22 @@ fn calculate_cost(walls: &HashSet<Point>, start: Point, end: Point) -> (usize, H
     (min_cost, paths)
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let (walls, start, end) = parse_walls(path);
     let (cost, _) = calculate_cost(&walls, start, end);
 
-    cost
+    cost.to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let (walls, start, end) = parse_walls(path);
     let (_, paths) = calculate_cost(&walls, start, end);
 
-    paths.len()
+    paths.len().to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_16.txt") == 101492);
-    assert!(b("input/exercise_16.txt") == 543);
+    assert!(a("input/exercise_16.txt") == "101492");
+    assert!(b("input/exercise_16.txt") == "543");
 }

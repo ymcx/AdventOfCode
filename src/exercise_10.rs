@@ -73,7 +73,7 @@ fn find_paths(
         })
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let (board, dimensions) = parse_board(path);
     let starting_points = find_starting_points(&board);
     starting_points
@@ -82,10 +82,11 @@ pub fn a(path: &str) -> usize {
             let (set, _) = find_paths(&board, dimensions, starting_point);
             set.len()
         })
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let (board, dimensions) = parse_board(path);
     let starting_points = find_starting_points(&board);
     starting_points
@@ -94,11 +95,12 @@ pub fn b(path: &str) -> usize {
             let (_, sum) = find_paths(&board, dimensions, starting_point);
             sum
         })
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_10.txt") == 733);
-    assert!(b("input/exercise_10.txt") == 1514);
+    assert!(a("input/exercise_10.txt") == "733");
+    assert!(b("input/exercise_10.txt") == "1514");
 }

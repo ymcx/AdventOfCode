@@ -15,7 +15,7 @@ fn get_vectors(path: &str) -> (Vec<usize>, Vec<usize>) {
     (lv, rv)
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let (mut lv, mut rv) = get_vectors(path);
 
     lv.sort();
@@ -24,19 +24,21 @@ pub fn a(path: &str) -> usize {
     lv.into_iter()
         .zip(rv.into_iter())
         .map(|(l, r)| l.abs_diff(r))
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let (lv, rv) = get_vectors(path);
 
     lv.into_iter()
         .map(|l| l * rv.iter().filter(|r| **r == l).count())
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_1.txt") == 2580760);
-    assert!(b("input/exercise_1.txt") == 25358365);
+    assert!(a("input/exercise_1.txt") == "2580760");
+    assert!(b("input/exercise_1.txt") == "25358365");
 }

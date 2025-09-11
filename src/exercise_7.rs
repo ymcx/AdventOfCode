@@ -55,16 +55,16 @@ fn get_result(path: &str, base: usize) -> usize {
         .sum()
 }
 
-pub fn a(path: &str) -> usize {
-    get_result(path, 2)
+pub fn a(path: &str) -> String {
+    get_result(path, 2).to_string()
 }
 
-pub fn b(path: &str) -> usize {
-    get_result(path, 3)
+pub fn b(path: &str) -> String {
+    get_result(path, 3).to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_7.txt") == 7710205485870);
-    assert!(b("input/exercise_7.txt") == 20928985450275);
+    assert!(a("input/exercise_7.txt") == "7710205485870");
+    assert!(b("input/exercise_7.txt") == "20928985450275");
 }

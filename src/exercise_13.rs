@@ -81,20 +81,20 @@ fn total_cost(path: &str, offset: isize, cost: (isize, isize)) -> usize {
         .sum()
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let offset = 0;
     let cost = (3, 1);
-    total_cost(path, offset, cost)
+    total_cost(path, offset, cost).to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let offset = isize::pow(10, 13);
     let cost = (3, 1);
-    total_cost(path, offset, cost)
+    total_cost(path, offset, cost).to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_13.txt") == 29201);
-    assert!(b("input/exercise_13.txt") == 104140871044942);
+    assert!(a("input/exercise_13.txt") == "29201");
+    assert!(b("input/exercise_13.txt") == "104140871044942");
 }

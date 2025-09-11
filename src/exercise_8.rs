@@ -23,7 +23,7 @@ fn parse_board(path: &str) -> (HashMap<char, HashSet<SignedPoint>>, SignedPoint)
     (antennas, dimensions)
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let (antennas, dimensions) = parse_board(path);
     let (y_max, x_max) = dimensions;
 
@@ -47,9 +47,10 @@ pub fn a(path: &str) -> usize {
         .into_iter()
         .filter(|&(y, x)| y >= 0 && x >= 0 && y_max > y && x_max > x)
         .count()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let (antennas, dimensions) = parse_board(path);
     let (y_max, x_max) = dimensions;
 
@@ -73,11 +74,11 @@ pub fn b(path: &str) -> usize {
         }
     }
 
-    antidotes.len()
+    antidotes.len().to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_8.txt") == 423);
-    assert!(b("input/exercise_8.txt") == 1287);
+    assert!(a("input/exercise_8.txt") == "423");
+    assert!(b("input/exercise_8.txt") == "1287");
 }

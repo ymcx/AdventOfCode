@@ -20,16 +20,17 @@ fn collect_levels(line: &Result<String, Error>) -> Vec<usize> {
         .collect()
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     misc::lines(path)
         .filter(|line| {
             let values = &collect_levels(line);
             is_sorted(values) && is_gradual(values)
         })
         .count()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     misc::lines(path)
         .filter(|line| {
             let values = &collect_levels(line);
@@ -45,10 +46,11 @@ pub fn b(path: &str) -> usize {
                 .any(|v| is_sorted(&v) && is_gradual(&v))
         })
         .count()
+        .to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_2.txt") == 549);
-    assert!(b("input/exercise_2.txt") == 589);
+    assert!(a("input/exercise_2.txt") == "549");
+    assert!(b("input/exercise_2.txt") == "589");
 }

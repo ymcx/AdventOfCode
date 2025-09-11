@@ -40,16 +40,16 @@ fn amount(path: &str, blinks: usize) -> usize {
     stones.values().sum()
 }
 
-pub fn a(path: &str) -> usize {
-    amount(path, 25)
+pub fn a(path: &str) -> String {
+    amount(path, 25).to_string()
 }
 
-pub fn b(path: &str) -> usize {
-    amount(path, 75)
+pub fn b(path: &str) -> String {
+    amount(path, 75).to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_11.txt") == 209412);
-    assert!(b("input/exercise_11.txt") == 248967696501656);
+    assert!(a("input/exercise_11.txt") == "209412");
+    assert!(b("input/exercise_11.txt") == "248967696501656");
 }

@@ -237,26 +237,26 @@ fn get_coordinates(obstacles: &HashMap<SignedPoint, u8>) -> usize {
         .sum::<i32>() as usize
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let (mut obstacles, mut robot, movements) = parse_board(path, false);
     movements.iter().for_each(|movement| {
         move_robot(&mut obstacles, &mut robot, *movement);
     });
 
-    get_coordinates(&obstacles)
+    get_coordinates(&obstacles).to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let (mut obstacles, mut robot, movements) = parse_board(path, true);
     movements.iter().for_each(|movement| {
         move_robot_large(&mut obstacles, &mut robot, *movement);
     });
 
-    get_coordinates(&obstacles)
+    get_coordinates(&obstacles).to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_15.txt") == 1430439);
-    assert!(b("input/exercise_15.txt") == 1458740);
+    assert!(a("input/exercise_15.txt") == "1430439");
+    assert!(b("input/exercise_15.txt") == "1458740");
 }

@@ -1,6 +1,6 @@
 use crate::misc;
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let text = misc::text(path);
     let text: Vec<i32> = text
         .trim()
@@ -39,10 +39,11 @@ pub fn a(path: &str) -> usize {
         .enumerate()
         .filter(|&(_, &char)| char != -1)
         .map(|(i, &char)| i * char as usize)
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let text = misc::text(path);
     let mut text: Vec<(i32, usize)> = text
         .trim()
@@ -94,11 +95,12 @@ pub fn b(path: &str) -> usize {
                 })
                 .sum()
         })
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_9.txt") == 6378826667552);
-    assert!(b("input/exercise_9.txt") == 6413328569890);
+    assert!(a("input/exercise_9.txt") == "6378826667552");
+    assert!(b("input/exercise_9.txt") == "6413328569890");
 }

@@ -93,14 +93,16 @@ fn travel(
     }
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let (board, dimensions) = parse_board(path);
     let (obstacles, start_position) = parse_obstacles(&board);
 
-    travel(start_position, dimensions, &obstacles).len()
+    travel(start_position, dimensions, &obstacles)
+        .len()
+        .to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let (board, dimensions) = parse_board(path);
     let (obstacles, start_position) = parse_obstacles(&board);
     let route = travel(start_position, dimensions, &obstacles);
@@ -127,11 +129,12 @@ pub fn b(path: &str) -> usize {
                 })
                 .count()
         })
-        .sum()
+        .sum::<usize>()
+        .to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_6.txt") == 5067);
-    assert!(b("input/exercise_6.txt") == 1793);
+    assert!(a("input/exercise_6.txt") == "5067");
+    assert!(b("input/exercise_6.txt") == "1793");
 }

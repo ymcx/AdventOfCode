@@ -1,9 +1,9 @@
-pub fn a(_path: &str) -> usize {
-    0
+pub fn a(_path: &str) -> String {
+    "".to_string()
 }
 
-pub fn b(_path: &str) -> usize {
-    0
+pub fn b(_path: &str) -> String {
+    "".to_string()
 }
 
 // #[test]

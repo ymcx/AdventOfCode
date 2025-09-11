@@ -73,31 +73,31 @@ fn contains_consecutive_columns(robots: &Vec<(SignedPoint, SignedPoint)>) -> boo
         != 0
 }
 
-pub fn a(path: &str) -> usize {
+pub fn a(path: &str) -> String {
     let mut robots = parse_robots(path);
     let dimensions = (101, 103);
 
     move_robots(&mut robots, dimensions, 100);
-    safe_value(&robots, dimensions)
+    safe_value(&robots, dimensions).to_string()
 }
 
-pub fn b(path: &str) -> usize {
+pub fn b(path: &str) -> String {
     let mut robots = parse_robots(path);
     let dimensions = (101, 103);
 
     for i in 0..10000 {
         if contains_consecutive_columns(&robots) {
-            return i;
+            return i.to_string();
         }
 
         move_robots(&mut robots, dimensions, 1);
     }
 
-    0
+    "".to_string()
 }
 
 #[test]
 fn test() {
-    assert!(a("input/exercise_14.txt") == 224554908);
-    assert!(b("input/exercise_14.txt") == 6644);
+    assert!(a("input/exercise_14.txt") == "224554908");
+    assert!(b("input/exercise_14.txt") == "6644");
 }
