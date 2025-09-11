@@ -16,6 +16,14 @@ pub fn args() -> Vec<String> {
     env::args().collect()
 }
 
+pub fn nth_line(path: &str, line: usize) -> String {
+    lines(path).nth(line).unwrap().unwrap()
+}
+
+pub fn count_lines(path: &str) -> usize {
+    lines(path).count()
+}
+
 pub fn lines(path: &str) -> Lines<BufReader<File>> {
     get_reader(path).lines()
 }

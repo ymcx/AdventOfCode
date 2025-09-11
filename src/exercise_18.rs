@@ -62,12 +62,30 @@ pub fn a(path: &str) -> String {
     calculate_cost(&walls, size).to_string()
 }
 
-pub fn b(_: &str) -> String {
-    String::new()
+pub fn b(path: &str) -> String {
+    let mut min = 1024;
+    let mut mid;
+    let mut max = misc::count_lines(path);
+    loop {
+        mid = (min + max) / 2;
+
+        let (walls, size) = parse_walls(path, mid);
+        let cost = calculate_cost(&walls, size);
+
+        if min == mid || max == mid {
+            return misc::nth_line(path, mid);
+        }
+
+        if cost == 0 {
+            max = mid;
+        } else {
+            min = mid;
+        }
+    }
 }
 
 #[test]
 fn test() {
     assert!(a("input/exercise_18.txt") == "280");
-    // assert!(b("input/exercise_18.txt") == "");
+    assert!(b("input/exercise_18.txt") == "28,56");
 }
