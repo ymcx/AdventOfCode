@@ -34,7 +34,7 @@ fn invalid_update(
 
 pub fn a(path: &str) -> String {
     let text = misc::text(path);
-    let (rules, updates) = text.trim().split_once("\n\n").unwrap();
+    let (rules, updates) = text.split_once("\n\n").unwrap();
     let rules = parse_rules(rules);
 
     updates
@@ -54,7 +54,7 @@ pub fn a(path: &str) -> String {
 
 pub fn b(path: &str) -> String {
     let text = misc::text(path);
-    let (rules, updates) = text.trim().split_once("\n\n").unwrap();
+    let (rules, updates) = text.split_once("\n\n").unwrap();
     let rules = parse_rules(rules);
 
     updates

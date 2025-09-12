@@ -31,5 +31,5 @@ pub fn lines(path: &str) -> Lines<BufReader<File>> {
 pub fn text(path: &str) -> String {
     let mut text = String::new();
     get_reader(path).read_to_string(&mut text).unwrap();
-    text
+    text.trim().to_string()
 }

@@ -3,7 +3,6 @@ use crate::misc;
 pub fn a(path: &str) -> String {
     let text = misc::text(path);
     let text: Vec<i32> = text
-        .trim()
         .chars()
         .enumerate()
         .map(|(i, char)| {
@@ -46,7 +45,6 @@ pub fn a(path: &str) -> String {
 pub fn b(path: &str) -> String {
     let text = misc::text(path);
     let mut text: Vec<(i32, usize)> = text
-        .trim()
         .chars()
         .enumerate()
         .map(|(i, char)| {

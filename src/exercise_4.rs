@@ -52,7 +52,6 @@ fn found_pair(origin: (isize, isize), board: &Vec<Vec<char>>) -> bool {
 pub fn a(path: &str) -> String {
     let word = "XMAS";
     let board: Vec<Vec<char>> = misc::text(path)
-        .trim()
         .split("\n")
         .map(|row| row.chars().collect())
         .collect();
@@ -82,7 +81,6 @@ pub fn a(path: &str) -> String {
 
 pub fn b(path: &str) -> String {
     let board: Vec<Vec<char>> = misc::text(path)
-        .trim()
         .split("\n")
         .map(|row| row.chars().collect())
         .collect();

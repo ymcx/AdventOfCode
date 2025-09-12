@@ -28,7 +28,7 @@ fn amount(path: &str, blinks: usize) -> usize {
     let text = misc::text(path);
     let mut stones = HashMap::new();
 
-    text.trim().split(" ").for_each(|num| {
+    text.split(" ").for_each(|num| {
         let num = num.parse().unwrap();
         *stones.entry(num).or_insert(0) += 1;
     });

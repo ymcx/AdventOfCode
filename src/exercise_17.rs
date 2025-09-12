@@ -121,7 +121,7 @@ fn op7_cdv(combo_operand: usize) {
 
 fn parse_machine(path: &str) -> (Vec<usize>, Vec<usize>) {
     let text = misc::text(path);
-    let (registers, instructions) = text.trim().split_once("\n\n").unwrap();
+    let (registers, instructions) = text.split_once("\n\n").unwrap();
     let registers = registers
         .split("\n")
         .map(|register| register.split_at(12).1.parse().unwrap())
