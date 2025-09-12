@@ -1,5 +1,4 @@
 use crate::misc;
-use std::io::Error;
 
 fn is_sorted(values: &Vec<usize>) -> bool {
     values.is_sorted_by(|a, b| a <= b) || values.is_sorted_by(|a, b| a >= b)
@@ -12,16 +11,15 @@ fn is_gradual(values: &Vec<usize>) -> bool {
     })
 }
 
-fn collect_levels(line: &Result<String, Error>) -> Vec<usize> {
-    line.as_ref()
-        .unwrap()
-        .split_whitespace()
+fn collect_levels(line: &str) -> Vec<usize> {
+    line.split_whitespace()
         .map(|i| i.parse().unwrap())
         .collect()
 }
 
 pub fn a(path: &str) -> String {
     misc::lines(path)
+        .iter()
         .filter(|line| {
             let values = &collect_levels(line);
             is_sorted(values) && is_gradual(values)
@@ -32,6 +30,7 @@ pub fn a(path: &str) -> String {
 
 pub fn b(path: &str) -> String {
     misc::lines(path)
+        .iter()
         .filter(|line| {
             let values = &collect_levels(line);
             (0..values.len())

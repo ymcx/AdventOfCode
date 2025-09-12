@@ -12,8 +12,8 @@ fn parse_values(parts: &mut Split<&str>) -> SignedPoint {
 
 fn parse_robots(path: &str) -> Vec<(SignedPoint, SignedPoint)> {
     misc::lines(path)
+        .iter()
         .map(|line| {
-            let line = line.unwrap();
             let mut parts = line.split(" ");
             (parse_values(&mut parts), parse_values(&mut parts))
         })

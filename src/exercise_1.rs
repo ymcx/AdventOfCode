@@ -4,8 +4,7 @@ fn get_vectors(path: &str) -> (Vec<usize>, Vec<usize>) {
     let mut lv = Vec::new();
     let mut rv = Vec::new();
 
-    misc::lines(path).for_each(|line| {
-        let line = line.unwrap();
+    misc::lines(path).iter().for_each(|line| {
         let (l, r) = line.split_at(5);
         let (l, r) = (l.parse().unwrap(), r.trim().parse().unwrap());
         lv.push(l);

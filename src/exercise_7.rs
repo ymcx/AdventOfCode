@@ -13,8 +13,8 @@ fn create_mask(base: usize, seed: usize, length: usize) -> Vec<usize> {
 
 fn parse_values(path: &str) -> Vec<(usize, Vec<usize>)> {
     misc::lines(path)
+        .iter()
         .map(|line| {
-            let line = line.unwrap();
             let (test, values) = line.split_once(": ").unwrap();
             let test: usize = test.parse().unwrap();
             let values: Vec<usize> = values.split(" ").map(|i| i.parse().unwrap()).collect();

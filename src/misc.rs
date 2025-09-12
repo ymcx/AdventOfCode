@@ -1,7 +1,7 @@
 use std::{
     env,
     fs::File,
-    io::{BufRead, BufReader, Lines, Read},
+    io::{BufRead, BufReader, Read},
 };
 
 pub type Point = (usize, usize);
@@ -17,15 +17,15 @@ pub fn args() -> Vec<String> {
 }
 
 pub fn nth_line(path: &str, line: usize) -> String {
-    lines(path).nth(line).unwrap().unwrap()
+    lines(path)[line].to_string()
 }
 
 pub fn count_lines(path: &str) -> usize {
-    lines(path).count()
+    lines(path).len()
 }
 
-pub fn lines(path: &str) -> Lines<BufReader<File>> {
-    get_reader(path).lines()
+pub fn lines(path: &str) -> Vec<String> {
+    get_reader(path).lines().map(|line| line.unwrap()).collect()
 }
 
 pub fn text(path: &str) -> String {

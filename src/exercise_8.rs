@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 fn parse_board(path: &str) -> (HashMap<char, HashSet<SignedPoint>>, SignedPoint) {
     let mut antennas = HashMap::new();
-    let lines: Vec<String> = misc::lines(path).map(|i| i.unwrap()).collect();
+    let lines = misc::lines(path);
     let dimensions = (lines.len() as i32, lines[0].len() as i32);
 
     lines.iter().enumerate().for_each(|(y, line)| {

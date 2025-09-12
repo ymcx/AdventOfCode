@@ -76,7 +76,8 @@ fn travel(
 
 fn parse_board(path: &str) -> (Vec<Vec<char>>, SignedPoint) {
     let board: Vec<Vec<char>> = misc::lines(path)
-        .map(|line| line.unwrap().chars().collect())
+        .iter()
+        .map(|line| line.chars().collect())
         .collect();
     let dimensions = (board.len() as i32, board[0].len() as i32);
 

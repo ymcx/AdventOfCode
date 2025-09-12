@@ -3,9 +3,9 @@ use std::collections::HashSet;
 
 fn parse_board(path: &str) -> (Vec<Vec<i32>>, SignedPoint) {
     let board: Vec<Vec<i32>> = misc::lines(path)
+        .iter()
         .map(|line| {
-            line.unwrap()
-                .chars()
+            line.chars()
                 .map(|char| char.to_digit(10).unwrap() as i32)
                 .collect()
         })

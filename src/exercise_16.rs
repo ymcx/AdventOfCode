@@ -5,8 +5,8 @@ fn parse_walls(path: &str) -> (HashSet<Point>, Point, Point) {
     let mut walls = HashSet::new();
     let mut start = (0, 0);
     let mut end = (0, 0);
-    for (y, row) in misc::lines(path).enumerate() {
-        for (x, char) in row.unwrap().chars().enumerate() {
+    for (y, row) in misc::lines(path).iter().enumerate() {
+        for (x, char) in row.chars().enumerate() {
             let point = (y, x);
             match char {
                 '#' => {

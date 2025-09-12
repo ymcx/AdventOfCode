@@ -4,10 +4,10 @@ use std::collections::{HashSet, VecDeque};
 
 fn parse_walls(path: &str, amount: usize) -> (HashSet<Point>, usize) {
     let walls: HashSet<Point> = misc::lines(path)
+        .iter()
         .take(amount)
         .map(|line| {
-            line.unwrap()
-                .split(",")
+            line.split(",")
                 .map(|value| value.parse().unwrap())
                 .collect_tuple()
                 .unwrap()
