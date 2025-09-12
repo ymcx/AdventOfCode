@@ -1,5 +1,5 @@
 use crate::misc::{self, Point};
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 fn parse(path: &str) -> (HashSet<Point>, Point, Point, Point) {
     let lines = misc::lines(path);
@@ -47,61 +47,71 @@ fn get_legal_moves(
         })
 }
 
-fn get_time(walls: &HashSet<Point>, start: &Point, end: &Point, dimensions: &Point) -> usize {
+fn get_track(
+    walls: &HashSet<Point>,
+    start: &Point,
+    end: &Point,
+    dimensions: &Point,
+) -> HashMap<Point, usize> {
     let mut queue = VecDeque::new();
     let mut visited = HashSet::new();
-    let mut total_cost = 0;
-    queue.push_back((*start, 0));
+    queue.push_back((*start, 0, HashMap::new()));
 
-    while let Some((point, cost)) = queue.pop_front() {
+    while let Some((point, cost, mut track)) = queue.pop_front() {
         if visited.contains(&point) {
             continue;
         }
 
-        if point == *end {
-            total_cost = cost;
-            break;
-        }
-
         visited.insert(point);
+        track.insert(point, cost);
+
+        if point == *end {
+            return track;
+        }
 
         get_legal_moves(walls, dimensions, &point)
             .filter(|point| !visited.contains(point))
-            .for_each(|point| queue.push_back((point, cost + 1)));
+            .for_each(|point| queue.push_back((point, cost + 1, track.clone())));
     }
 
-    total_cost
+    HashMap::new()
 }
 
-fn wall_combinations(walls: &HashSet<Point>, dimensions: &Point) -> Vec<HashSet<Point>> {
-    walls
-        .iter()
-        .filter(|wall| get_legal_moves(walls, dimensions, wall).count() != 0)
-        .map(|wall| {
-            let mut combination = walls.clone();
-            combination.remove(wall);
-            combination
-        })
-        .collect()
-}
-
-pub fn a(path: &str) -> String {
+fn solve(path: &str, cheat: i32, saved: usize) -> String {
     let (walls, start, end, dimensions) = parse(path);
-    let legit_time = get_time(&walls, &start, &end, &dimensions);
+    let track = get_track(&walls, &start, &end, &dimensions);
+    let mut count = 0;
 
-    wall_combinations(&walls, &dimensions)
-        .iter()
-        .filter(|walls| 100 <= legit_time - get_time(&walls, &start, &end, &dimensions))
-        .count()
-        .to_string()
+    for (start_point, start_idx) in track.iter() {
+        for dy in -cheat..=cheat {
+            for dx in (dy.abs() - cheat)..=(cheat - dy.abs()) {
+                let end_point = (
+                    (dy + start_point.0 as i32) as usize,
+                    (dx + start_point.1 as i32) as usize,
+                );
+
+                if let Some(&end_idx) = track.get(&end_point) {
+                    let distance = (dy.abs() + dx.abs()) as usize;
+                    if end_idx >= start_idx + distance + saved {
+                        count += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    count.to_string()
+}
+pub fn a(path: &str) -> String {
+    solve(path, 2, 100)
 }
 
-pub fn b(_path: &str) -> String {
-    "".to_string()
+pub fn b(path: &str) -> String {
+    solve(path, 20, 100)
 }
 
 #[test]
 fn test() {
     assert!(a("input/exercise_20.txt") == "1327");
-    // assert!(b("input/exercise_20.txt") != 0);
+    assert!(b("input/exercise_20.txt") == "985737");
 }
