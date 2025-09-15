@@ -1,6 +1,5 @@
-use std::str::Chars;
-
 use crate::misc::{self, SignedPoint};
+use std::{collections::HashMap, str::Chars};
 
 const PATH: [[&str; 5]; 5] = [
     ["A", ">^A", ">A", ">>^A", ">>A"],
@@ -92,11 +91,11 @@ fn directional_keypad(
     PATH[*old_index][*index].chars()
 }
 
-fn line_to_complexity(line: &str, n: usize) -> usize {
+fn line_to_complexity(line: &str, n: usize, cache: &mut HashMap<String, Vec<char>>) -> usize {
     let mut robots = ((2, 3), (2, 0));
     let mut movements: String = line
         .chars()
-        .map(|char| numeric_keypad(char as u8, &mut robots.0))
+        .map(|c| numeric_keypad(c as u8, &mut robots.0))
         .flatten()
         .collect();
 
@@ -104,10 +103,23 @@ fn line_to_complexity(line: &str, n: usize) -> usize {
     let mut old_index = index;
     for _ in 0..n {
         movements = movements
-            .chars()
-            .map(|char| directional_keypad(char as u8, &mut robots.1, &mut old_index, &mut index))
+            .split_inclusive('A')
+            .map(|part| {
+                if let Some(cached) = cache.get(part) {
+                    return cached.clone();
+                }
+
+                let result: Vec<_> = part
+                    .chars()
+                    .map(|c| directional_keypad(c as u8, &mut robots.1, &mut old_index, &mut index))
+                    .flatten()
+                    .collect();
+
+                cache.insert(part.to_string(), result.clone());
+                result
+            })
             .flatten()
-            .collect();
+            .collect()
     }
 
     let len = movements.len();
@@ -122,9 +134,10 @@ fn line_to_complexity(line: &str, n: usize) -> usize {
 }
 
 fn solve(path: &str, n: usize) -> String {
+    let mut cache = HashMap::new();
     misc::lines(path)
         .iter()
-        .map(|line| line_to_complexity(line, n))
+        .map(|line| line_to_complexity(line, n, &mut cache))
         .sum::<usize>()
         .to_string()
 }
