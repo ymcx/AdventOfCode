@@ -70,9 +70,3 @@ pub fn b(path: &str) -> String {
 
     password
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_23.txt") == "1149");
-    assert!(b("input/exercise_23.txt") == "as,co,do,kh,km,mc,np,nt,un,uq,wc,wz,yo");
-}

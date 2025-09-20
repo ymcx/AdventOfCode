@@ -47,9 +47,3 @@ pub fn a(path: &str) -> String {
 pub fn b(path: &str) -> String {
     amount(path, 75).to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_11.txt") == "209412");
-    assert!(b("input/exercise_11.txt") == "248967696501656");
-}

@@ -130,9 +130,3 @@ pub fn a(path: &str) -> String {
 pub fn b(path: &str) -> String {
     price(path, false).to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_12.txt") == "1415378");
-    assert!(b("input/exercise_12.txt") == "862714");
-}

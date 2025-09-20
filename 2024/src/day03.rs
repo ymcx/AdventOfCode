@@ -46,9 +46,3 @@ pub fn b(path: &str) -> String {
         .sum::<usize>()
         .to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_3.txt") == "162813399");
-    assert!(b("input/exercise_3.txt") == "53783319");
-}

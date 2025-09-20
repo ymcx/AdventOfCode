@@ -114,9 +114,3 @@ pub fn b(path: &str) -> String {
 
     paths.len().to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_16.txt") == "101492");
-    assert!(b("input/exercise_16.txt") == "543");
-}

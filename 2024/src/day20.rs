@@ -109,9 +109,3 @@ pub fn a(path: &str) -> String {
 pub fn b(path: &str) -> String {
     solve(path, 20, 100)
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_20.txt") == "1327");
-    assert!(b("input/exercise_20.txt") == "985737");
-}

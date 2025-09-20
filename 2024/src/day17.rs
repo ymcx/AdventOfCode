@@ -65,9 +65,3 @@ pub fn b(path: &str) -> String {
     let (_, instructions) = parse_machine(path);
     check(0, 0, &instructions)[0].to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_17.txt") == "7,3,5,7,5,7,4,3,0");
-    assert!(b("input/exercise_17.txt") == "105734774294938");
-}

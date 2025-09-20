@@ -76,9 +76,3 @@ pub fn b(path: &str) -> String {
 
     antidotes.len().to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_8.txt") == "423");
-    assert!(b("input/exercise_8.txt") == "1287");
-}

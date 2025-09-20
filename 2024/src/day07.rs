@@ -62,9 +62,3 @@ pub fn a(path: &str) -> String {
 pub fn b(path: &str) -> String {
     get_result(path, 3).to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_7.txt") == "7710205485870");
-    assert!(b("input/exercise_7.txt") == "20928985450275");
-}

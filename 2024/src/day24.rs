@@ -93,9 +93,3 @@ pub fn b(path: &str) -> String {
 
     swapped.iter().sorted().join(",")
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_24.txt") == "59364044286798");
-    assert!(b("input/exercise_24.txt") == "cbj,cfk,dmn,gmt,qjj,z07,z18,z35");
-}

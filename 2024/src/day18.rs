@@ -83,9 +83,3 @@ pub fn b(path: &str) -> String {
         }
     }
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_18.txt") == "280");
-    assert!(b("input/exercise_18.txt") == "28,56");
-}

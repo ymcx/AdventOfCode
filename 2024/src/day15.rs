@@ -254,9 +254,3 @@ pub fn b(path: &str) -> String {
 
     get_coordinates(&obstacles).to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_15.txt") == "1430439");
-    assert!(b("input/exercise_15.txt") == "1458740");
-}

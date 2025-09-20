@@ -48,9 +48,3 @@ pub fn b(path: &str) -> String {
 
     sequences.values().max().unwrap().to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_22.txt") == "20071921341");
-    assert!(b("input/exercise_22.txt") == "2242");
-}

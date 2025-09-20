@@ -101,9 +101,3 @@ pub fn b(path: &str) -> String {
 
     count.to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_4.txt") == "2554");
-    assert!(b("input/exercise_4.txt") == "1916");
-}

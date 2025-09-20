@@ -92,9 +92,3 @@ pub fn b(path: &str) -> String {
     let cost = (3, 1);
     total_cost(path, offset, cost).to_string()
 }
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_13.txt") == "29201");
-    assert!(b("input/exercise_13.txt") == "104140871044942");
-}

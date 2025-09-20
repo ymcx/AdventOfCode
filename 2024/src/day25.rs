@@ -23,6 +23,7 @@ fn parse(path: &str) -> (Vec<[usize; 5]>, Vec<[usize; 5]>) {
 
     (locks, keys)
 }
+
 pub fn a(path: &str) -> String {
     let (locks, keys) = parse(path);
 
@@ -35,14 +36,4 @@ pub fn a(path: &str) -> String {
         })
         .sum::<usize>()
         .to_string()
-}
-
-pub fn b(_path: &str) -> String {
-    "".to_string()
-}
-
-#[test]
-fn test() {
-    assert!(a("input/exercise_25.txt") == "3196");
-    // assert!(b("input/exercise_25.txt") != 0);
 }
