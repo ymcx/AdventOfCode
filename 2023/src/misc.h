@@ -7,18 +7,25 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> get_lines(std::string path);
+using namespace std;
 
-std::optional<int> parse_digits(std::string input);
+vector<string> get_lines(string path);
+
+optional<int> parse_digits(string input);
+
+vector<string> split(string input, string delimiter);
+
+vector<string> split_list(string input);
+
+vector<string> split_space(string input);
 
 template <typename T, typename F>
-std::vector<F> transform_vector(const std::vector<T> &input,
-                                std::optional<F> function(T)) {
-  std::vector<F> output;
+vector<F> transform_vector(const vector<T> &input, optional<F> function(T)) {
+  vector<F> output;
   output.reserve(input.size());
 
   for (T i : input) {
-    std::optional<F> res = function(i);
+    optional<F> res = function(i);
     if (res.has_value()) {
       output.push_back(res.value());
     }
@@ -27,11 +34,11 @@ std::vector<F> transform_vector(const std::vector<T> &input,
   return output;
 }
 
-template <typename T> T sum(const std::vector<T> &input) {
-  return std::accumulate(input.begin(), input.end(), 0);
+template <typename T> T sum(const vector<T> &input) {
+  return accumulate(input.begin(), input.end(), 0);
 }
 
-template <typename T> void print(T input) { std::cout << input; }
+template <typename T> void print(T input) { cout << input; }
 
 template <typename T> void println(T input) {
   print(input);
