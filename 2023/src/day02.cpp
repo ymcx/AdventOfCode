@@ -1,5 +1,5 @@
-#include "misc.h"
-#include <ranges>
+#include "misc/io.h"
+#include "misc/string.h"
 #include <regex>
 #include <string>
 #include <vector>
@@ -7,10 +7,10 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  vector<string> lines = get_lines(argv[1]);
+  vector<string> lines = read_lines(argv[1]);
   int p1 = 0, p2 = 0;
 
-  for (auto [i, line] : lines | views::enumerate) {
+  for (auto [i, line] : views::enumerate(lines)) {
     map<string, int> needed = {{"red", 0}, {"green", 0}, {"blue", 0}};
     line = regex_replace(line, regex(".+: "), "");
     line = regex_replace(line, regex(";"), ",");
@@ -33,5 +33,5 @@ int main(int argc, char *argv[]) {
     p2 += needed["red"] * needed["green"] * needed["blue"];
   }
 
-  assert_cout(p1, p2, 3035, 66027);
+  assert_print(p1, p2, 3035, 66027);
 }
