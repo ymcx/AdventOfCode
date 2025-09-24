@@ -17,10 +17,12 @@ pair<vector<int>, vector<int>> cards(string line) {
   return {cards_l, cards_r};
 }
 
-vector<int> winning_amount(const vector<string> &lines) {
+pair<vector<int>, unordered_map<int, int>>
+winning_amount(const vector<string> &lines) {
   vector<int> total_amount;
+  unordered_map<int, int> weights;
 
-  for (string line : lines) {
+  for (auto [i, line] : views::enumerate(lines)) {
     int amount = 0;
     auto [cards_l, cards_r] = cards(line);
     for (int card_r : cards_r) {
@@ -28,10 +30,16 @@ vector<int> winning_amount(const vector<string> &lines) {
         ++amount;
       }
     }
+
+    weights[i] += 1;
+    for (int j = 1; j <= amount; ++j) {
+      weights[i + j] += weights[i];
+    }
+
     total_amount.push_back(amount);
   }
 
-  return total_amount;
+  return {total_amount, weights};
 }
 
 optional<int> get_points(int amount) {
@@ -44,8 +52,12 @@ optional<int> get_points(int amount) {
 
 int main(int argc, char *argv[]) {
   vector<string> lines = read_lines(argv[1]);
-  vector<int> amount = winning_amount(lines);
+  auto [amount, weights] = winning_amount(lines);
+
   vector<int> points = filter_map(amount, get_points);
   int p1 = sum(points);
-  println(p1);
+
+  int p2 = sum(values(weights));
+
+  assert_print(p1, p2, 20107, 8172507);
 }

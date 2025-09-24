@@ -71,3 +71,15 @@ void each(const vector<T> &input, F function(T)) {
 template <typename T> bool contains(const vector<T> &vec, T value) {
   return find(vec.begin(), vec.end(), value) != vec.end();
 }
+
+template <typename T, typename F>
+vector<T> values(const unordered_map<F, T> &map) {
+  vector<T> values;
+  values.reserve(map.size());
+
+  for (auto [_, value] : map) {
+    values.push_back(value);
+  }
+
+  return values;
+}
