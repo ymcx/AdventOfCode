@@ -67,3 +67,7 @@ void each(const vector<T> &input, F function(T)) {
     function(i);
   }
 }
+
+template <typename T> bool contains(const vector<T> &vec, T value) {
+  return find(vec.begin(), vec.end(), value) != vec.end();
+}
