@@ -1,6 +1,7 @@
 #pragma once
 
 #include "point.h"
+#include <numeric>
 #include <optional>
 #include <string>
 #include <unordered_set>
@@ -8,10 +9,8 @@
 
 using namespace std;
 
-int sum(const vector<int> &input);
-
-unordered_set<Point, PointHash> coordinates(const vector<string> &board,
-                                            const vector<char> &targets);
+unordered_set<Point> coordinates(const vector<string> &board,
+                                 const vector<char> &targets);
 
 template <typename T, typename F>
 vector<F> map(const vector<T> &input, F function(T)) {
@@ -24,6 +23,10 @@ vector<F> map(const vector<T> &input, F function(T)) {
   }
 
   return output;
+}
+
+template <typename T> int sum(const T &input) {
+  return accumulate(input.begin(), input.end(), 0);
 }
 
 template <typename T, typename F>
