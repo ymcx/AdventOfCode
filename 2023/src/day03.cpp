@@ -31,13 +31,14 @@ optional<int> extract(string line, Point p, unordered_set<Point> *checked) {
 }
 
 vector<int> closest_numbers(const vector<string> &board,
-                            const unordered_set<Point> &points) {
+                            const unordered_set<Point> &points, bool p2) {
   vector<int> results;
   unordered_set<Point> checked;
   int y_max = board.size();
   int x_max = board[0].size();
 
   for (Point p : points) {
+    vector<int> result;
     for (int dy = -1; dy < 2; ++dy) {
       for (int dx = -1; dx < 2; ++dx) {
         int y = p.y + dy;
@@ -52,10 +53,16 @@ vector<int> closest_numbers(const vector<string> &board,
           Point p(y, x);
           optional<int> number = extract(line, p, &checked);
           if (number.has_value()) {
-            results.push_back(number.value());
+            result.push_back(number.value());
           }
         }
       }
+    }
+
+    if (!p2) {
+      results.insert(results.end(), result.begin(), result.end());
+    } else if (result.size() == 2) {
+      results.push_back(result[0] * result[1]);
     }
   }
 
@@ -64,9 +71,16 @@ vector<int> closest_numbers(const vector<string> &board,
 
 int main(int argc, char *argv[]) {
   vector<string> board = read_lines(argv[1]);
-  vector<char> targets = {'$', '&', '*', '-', '#', '%', '+', '/', '=', '@'};
-  unordered_set<Point> coords = coordinates(board, targets);
-  vector<int> numbers = closest_numbers(board, coords);
-  int p1 = sum(numbers);
-  println(p1);
+
+  vector<char> targets_p1 = {'$', '&', '*', '-', '#', '%', '+', '/', '=', '@'};
+  unordered_set<Point> coords_p1 = coordinates(board, targets_p1);
+  vector<int> numbers_p1 = closest_numbers(board, coords_p1, false);
+  int p1 = sum(numbers_p1);
+
+  vector<char> targets_p2 = {'*'};
+  unordered_set<Point> coords_p2 = coordinates(board, targets_p2);
+  vector<int> numbers_p2 = closest_numbers(board, coords_p2, true);
+  int p2 = sum(numbers_p2);
+
+  assert_print(p1, p2, 507214, 72553319);
 }
