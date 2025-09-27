@@ -11,8 +11,8 @@ using namespace std;
 pair<vector<int>, vector<int>> cards(string line) {
   line = regex_replace(line, regex(".+: "), "");
   vector<string> parts = split(line, " | ");
-  vector<int> cards_l = filter_map(split_space(parts[0]), parse);
-  vector<int> cards_r = filter_map(split_space(parts[1]), parse);
+  vector<int> cards_l = filter_map(split_space(parts[0]), parse_int);
+  vector<int> cards_r = filter_map(split_space(parts[1]), parse_int);
 
   return {cards_l, cards_r};
 }

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-optional<int> parse(string input) {
+string parse(string input) {
   string digits = "";
 
   for (char c : input) {
@@ -14,11 +14,34 @@ optional<int> parse(string input) {
     }
   }
 
-  if (digits.empty()) {
+  return digits;
+}
+
+optional<int> parse_int(string input) {
+  string output = parse(input);
+  if (output.empty()) {
     return nullopt;
   }
 
-  return stoi(digits);
+  return stoi(output);
+}
+
+optional<long> parse_long(string input) {
+  string output = parse(input);
+  if (output.empty()) {
+    return nullopt;
+  }
+
+  return stol(output);
+}
+
+optional<long long> parse_long_long(string input) {
+  string output = parse(input);
+  if (output.empty()) {
+    return nullopt;
+  }
+
+  return stoll(output);
 }
 
 vector<string> split(string input, string delimiter) {

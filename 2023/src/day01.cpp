@@ -48,7 +48,7 @@ int char_first_last(string input) {
 int main(int argc, char *argv[]) {
   vector<string> lines = read_lines(argv[1]);
 
-  vector<int> ints_p1 = filter_map(lines, parse);
+  vector<int> ints_p1 = filter_map(lines, parse_int);
   ints_p1 = map(ints_p1, digit_first_last);
   int p1 = sum(ints_p1);
 

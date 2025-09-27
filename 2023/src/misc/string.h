@@ -6,7 +6,13 @@
 
 using namespace std;
 
-optional<int> parse(string input);
+string parse(string input);
+
+optional<int> parse_int(string input);
+
+optional<long> parse_long(string input);
+
+optional<long long> parse_long_long(string input);
 
 vector<string> split(string input, string delimiter);
 
