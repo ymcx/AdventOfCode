@@ -1,45 +1,54 @@
 #include "misc/io.h"
 #include "misc/string.h"
 #include "misc/vector.h"
-#include <regex>
 #include <string>
 #include <vector>
 
 using namespace std;
 
-vector<pair<int, int>> parse_races(string path) {
-  vector<string> lines = read_lines(path);
-  lines[0] = regex_replace(lines[0], regex(".+: "), "");
-  lines[1] = regex_replace(lines[1], regex(".+: "), "");
+vector<pair<long, long>> parse_races(const vector<string> &lines) {
+  vector<long> times = filter_map(split(lines[0], " "), parse_long);
+  vector<long> bests = filter_map(split(lines[1], " "), parse_long);
 
-  vector<string> parts0l = split(lines[0], " ");
-  vector<string> parts1l = split(lines[1], " ");
+  vector<pair<long, long>> races;
+  races.reserve(times.size());
 
-  vector<int> parts0 = filter_map(parts0l, parse_int);
-  vector<int> parts1 = filter_map(parts1l, parse_int);
-
-  vector<pair<int, int>> races;
-  races.reserve(parts0.size());
-
-  for (int i = 0; i < parts0.size(); ++i) {
-    races.emplace_back(parts0[i], parts1[i]);
+  for (int i = 0; i < times.size(); ++i) {
+    races.emplace_back(times[i], bests[i]);
   }
+
   return races;
 }
 
-int main(int argc, char *argv[]) {
-  vector<pair<int, int>> races = parse_races(argv[1]);
+pair<long, long> parse_race(const vector<string> &lines) {
+  long time = parse_long(lines[0]).value();
+  long best = parse_long(lines[1]).value();
 
-  int total = 1;
-  for (auto [time, best] : races) {
-    int count = 0;
+  return {time, best};
+}
 
-    for (int hold = 1; hold < time; ++hold) {
-      if ((time - hold) * hold > best) {
-        ++count;
-      }
+int win_amount(long time, long best) {
+  int amount = 0;
+
+  for (int hold = 1; hold < time; ++hold) {
+    if (best < (time - hold) * hold) {
+      ++amount;
     }
-    total *= count;
   }
-  println(total);
+
+  return amount;
+}
+
+int main(int argc, char *argv[]) {
+  vector<string> lines = read_lines(argv[1]);
+
+  int p1 = 1;
+  for (auto [time, best] : parse_races(lines)) {
+    p1 *= win_amount(time, best);
+  }
+
+  auto [time, best] = parse_race(lines);
+  int p2 = win_amount(time, best);
+
+  assert_print(p1, p2, 211904, 43364472);
 }
