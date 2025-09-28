@@ -17,8 +17,8 @@ vector<F> map(const vector<T> &input, F function(T)) {
   vector<F> output;
   output.reserve(input.size());
 
-  for (T i : input) {
-    F res = function(i);
+  for (auto i : input) {
+    auto res = function(i);
     output.push_back(res);
   }
 
@@ -34,8 +34,8 @@ vector<F> filter_map(const vector<T> &input, optional<F> function(T)) {
   vector<F> output;
   output.reserve(input.size());
 
-  for (T i : input) {
-    optional<F> res = function(i);
+  for (auto i : input) {
+    auto res = function(i);
     if (res.has_value()) {
       output.push_back(res.value());
     }
@@ -44,16 +44,29 @@ vector<F> filter_map(const vector<T> &input, optional<F> function(T)) {
   return output;
 }
 
-template <typename T, typename F, typename R>
-vector<T> filter(const vector<T> &input, F function(T)) {
+template <typename T>
+vector<T> filter(const vector<T> &input, bool function(T)) {
   vector<T> output;
   output.reserve(input.size());
 
-  for (T i : input) {
-    F res = function(i);
-    if (is_same_v<F, bool> && res) {
+  for (auto i : input) {
+    auto res = function(i);
+    if (res) {
       output.push_back(i);
-    } else if (is_same_v<F, optional<R>> && res.has_value()) {
+    }
+  }
+
+  return output;
+}
+
+template <typename T, typename F>
+vector<T> filter(const vector<T> &input, optional<F> function(T)) {
+  vector<T> output;
+  output.reserve(input.size());
+
+  for (auto i : input) {
+    auto res = function(i);
+    if (res.has_value()) {
       output.push_back(i);
     }
   }
@@ -63,13 +76,25 @@ vector<T> filter(const vector<T> &input, F function(T)) {
 
 template <typename T, typename F>
 void each(const vector<T> &input, F function(T)) {
-  for (T i : input) {
+  for (auto i : input) {
     function(i);
   }
 }
 
-template <typename T> bool contains(const vector<T> &vec, T value) {
-  return find(vec.begin(), vec.end(), value) != vec.end();
+template <typename T> bool contains(const vector<T> &input, T value) {
+  return find(input.begin(), input.end(), value) != input.end();
+}
+
+template <typename T, typename F>
+vector<F> keys(const unordered_map<F, T> &map) {
+  vector<F> keys;
+  keys.reserve(map.size());
+
+  for (auto [key, _] : map) {
+    keys.push_back(key);
+  }
+
+  return keys;
 }
 
 template <typename T, typename F>

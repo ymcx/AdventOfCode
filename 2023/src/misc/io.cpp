@@ -19,3 +19,5 @@ vector<string> read_lines(string path) {
 
   return lines;
 }
+
+void println() { print("\n"); }
