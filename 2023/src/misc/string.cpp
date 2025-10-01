@@ -9,7 +9,7 @@ string parse(string input) {
   string digits = "";
 
   for (char c : input) {
-    if (isdigit(c)) {
+    if (isdigit(c) || c == '-') {
       digits += c;
     }
   }
