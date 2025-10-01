@@ -1,38 +1,40 @@
 #include "misc/io.h"
 #include "misc/string.h"
 #include "misc/vector.h"
+#include <algorithm>
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
   vector<string> lines = read_lines(argv[1]);
-  int result = 0;
+  int p1 = 0;
+  int p2 = 0;
 
   for (string line : lines) {
-
     unordered_map<int, vector<int>> layers;
     layers[0] = filter_map(split(line, " "), parse_int);
 
-    for (int layer = 0; true; ++layer) {
-      vector<int> new_layer;
-      for (int i = 1; i < layers[layer].size(); ++i) {
-        int value = layers[layer][i];
-        int last = layers[layer][i - 1];
-        int new_value = value - last;
-        new_layer.push_back(new_value);
+    for (int l = 0; true; ++l) {
+      vector<int> layer;
+
+      for (int i = 1; i < layers[l].size(); ++i) {
+        int cur = layers[l][i];
+        int prev = layers[l][i - 1];
+        layer.push_back(cur - prev);
       }
 
-      if (all_of(new_layer.begin(), new_layer.end(),
-                 [](int i) { return i == 0; })) {
-        for (auto [_, v] : layers) {
-          result += v.back();
+      if (ranges::all_of(layer, [](int i) { return i == 0; })) {
+        for (int i = 0; i < layers.size(); ++i) {
+          p1 += layers[i].back();
+          p2 += layers[i].front() * (i % 2 == 0 ? 1 : -1);
         }
+
         break;
       }
 
-      layers[layer + 1] = new_layer;
+      layers[l + 1] = layer;
     }
   }
 
-  println(result);
+  assert_print(p1, p2, 1762065988, 1066);
 }
