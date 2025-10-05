@@ -9,6 +9,8 @@ using namespace std;
 
 vector<string> read_lines(string path);
 
+string read_text(string path);
+
 void println();
 
 template <typename T> void print(T input) { cout << input; }

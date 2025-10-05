@@ -19,3 +19,5 @@ vector<string> split(string input, string delimiter);
 vector<string> split_list(string input);
 
 vector<string> split_space(string input);
+
+vector<string> split_newline(string input);

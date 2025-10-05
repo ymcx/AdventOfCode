@@ -20,4 +20,20 @@ vector<string> read_lines(string path) {
   return lines;
 }
 
+string read_text(string path) {
+  string text;
+  string line;
+  ifstream file(path);
+
+  if (file.is_open()) {
+    while (getline(file, line)) {
+      text += line;
+      text += '\n';
+    }
+    file.close();
+  }
+
+  return text.substr(0, text.size()-1);
+}
+
 void println() { print("\n"); }
