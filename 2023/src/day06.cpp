@@ -7,8 +7,8 @@
 using namespace std;
 
 vector<pair<long, long>> parse_races(const vector<string> &lines) {
-  vector<long> times = filter_map(split(lines[0], " "), parse_long);
-  vector<long> bests = filter_map(split(lines[1], " "), parse_long);
+  vector<long> times = filter_map(split_space(lines[0]), parse_long);
+  vector<long> bests = filter_map(split_space(lines[1]), parse_long);
 
   vector<pair<long, long>> races;
   races.reserve(times.size());

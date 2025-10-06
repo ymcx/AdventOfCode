@@ -1,76 +1,79 @@
 #include "misc/io.h"
 #include "misc/string.h"
 #include "misc/vector.h"
+#include <string>
 #include <vector>
 
 using namespace std;
 
-vector<vector<string>> parse_walls(string path) {
+vector<vector<string>> parse_mirrors(string path) {
   string text = read_text(path);
-  vector<string> boards = split(text, "\n\n");
-  return map(boards, split_newline);
+  vector<string> mirrors = split_newnewline(text);
+  return map(mirrors, split_newline);
 }
 
-vector<string> transpose(vector<string> input) {
-  int rows = input.size();
-  int cols = input[0].size();
-
+vector<string> transpose(const vector<string> &input) {
   vector<string> output;
+  int max_y = input.size();
+  int max_x = input[0].size();
 
-  for (int col = 0; col < cols; ++col) {
-    string l;
-    for (int row = rows - 1; row >= 0; --row) {
-      l += input[row][col];
+  for (int x = 0; x < max_x; ++x) {
+    string line;
+    for (int y = 0; y < max_y; ++y) {
+      line += input[y][x];
     }
-    output.push_back(l);
+
+    output.push_back(line);
   }
 
   return output;
 }
 
-int isunique(vector<string> walls) {
-  int retiisi = 0;
+bool differ(string a, string b, int &changes, bool p2) {
+  for (int i = 0; i < a.length(); ++i) {
+    if (a[i] != b[i]) {
+      ++changes;
+    }
+  }
 
-  for (int i = 0; i < walls.size() - 1; ++i) {
-    int j = i + 1;
+  return ((!p2 && changes > 0) || (p2 && changes > 1));
+}
 
-    if (walls[i] == walls[j]) {
-      retiisi = j;
+int reflection(const vector<string> &mirrors, bool p2) {
+  for (int i = 0, j = 1; j < mirrors.size(); ++i, ++j) {
+    int changes = 0;
+    if (differ(mirrors[i], mirrors[j], changes, p2)) {
+      continue;
+    }
 
-      int a = i;
-      int b = j;
-      while (true) {
-        if (a < 0 || b >= walls.size()) {
-          return retiisi;
+    for (int a = i - 1, b = j + 1; true; --a, ++b) {
+      if (a < 0 || b >= mirrors.size()) {
+        if ((!p2 && changes == 0) || (p2 && changes == 1)) {
+          return j;
         }
-        if (walls[a] != walls[b]) {
-          break;
-        }
-        ++b;
-        --a;
+
+        break;
+      }
+
+      if (differ(mirrors[a], mirrors[b], changes, p2)) {
+        break;
       }
     }
   }
-  return -1;
+
+  return 0;
 }
 
 int main(int argc, char *argv[]) {
-  int total = 0;
-  vector<vector<string>> all_walls = parse_walls(argv[1]);
-  for (vector<string> walls : all_walls) {
-    bool passed = false;
-    int ref = isunique(walls);
-    if (ref != -1) {
-      passed = true;
-      total += ref * 100;
-    }
+  int p1 = 0, p2 = 0;
 
-    walls = transpose(walls);
-    ref = isunique(walls);
-    if (ref != -1) {
-      passed = true;
-      total += ref * 1;
-    }
+  for (vector<string> mirrors : parse_mirrors(argv[1])) {
+    p1 += reflection(mirrors, false) * 100;
+    p2 += reflection(mirrors, true) * 100;
+    mirrors = transpose(mirrors);
+    p1 += reflection(mirrors, false);
+    p2 += reflection(mirrors, true);
   }
-  println(total);
+
+  assert_print(p1, p2, 35691, 39037);
 }

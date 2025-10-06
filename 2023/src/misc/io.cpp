@@ -33,7 +33,8 @@ string read_text(string path) {
     file.close();
   }
 
-  return text.substr(0, text.size()-1);
+  text.pop_back();
+  return text;
 }
 
 void println() { print("\n"); }

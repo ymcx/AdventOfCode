@@ -12,7 +12,7 @@ pair<vector<long>, vector<unordered_map<long, Range>>>
 parse_seeds(string path) {
   vector<string> lines = read_lines(path);
   string seeds_str = regex_replace(lines[0], regex(".+: "), "");
-  vector<string> seeds_vec = split(seeds_str, " ");
+  vector<string> seeds_vec = split_space(seeds_str);
   vector<long> seeds = filter_map(seeds_vec, parse_long);
 
   vector<unordered_map<long, Range>> maps;

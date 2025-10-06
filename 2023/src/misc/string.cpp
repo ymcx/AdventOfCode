@@ -57,8 +57,12 @@ vector<string> split(string input, string delimiter) {
   return tokens;
 }
 
-vector<string> split_list(string input) { return split(input, ", "); }
+vector<string> split_comma(string input) { return split(input, ","); }
+
+vector<string> split_commaspace(string input) { return split(input, ", "); }
 
 vector<string> split_space(string input) { return split(input, " "); }
 
 vector<string> split_newline(string input) { return split(input, "\n"); }
+
+vector<string> split_newnewline(string input) { return split(input, "\n\n"); }

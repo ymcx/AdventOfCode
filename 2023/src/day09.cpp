@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
   for (string line : lines) {
     unordered_map<int, vector<int>> layers;
-    layers[0] = filter_map(split(line, " "), parse_int);
+    layers[0] = filter_map(split_space(line), parse_int);
 
     for (int l = 0; true; ++l) {
       vector<int> layer;

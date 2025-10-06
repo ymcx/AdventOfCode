@@ -16,8 +16,12 @@ optional<long long> parse_long_long(string input);
 
 vector<string> split(string input, string delimiter);
 
-vector<string> split_list(string input);
+vector<string> split_comma(string input);
+
+vector<string> split_commaspace(string input);
 
 vector<string> split_space(string input);
 
 vector<string> split_newline(string input);
+
+vector<string> split_newnewline(string input);

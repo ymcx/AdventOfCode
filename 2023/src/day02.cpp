@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     line = regex_replace(line, regex(".+: "), "");
     line = regex_replace(line, regex(";"), ",");
 
-    vector<string> balls = split_list(line);
+    vector<string> balls = split_commaspace(line);
     for (string ball : balls) {
       vector<string> ball_parts = split_space(ball);
       int amount = stoi(ball_parts[0]);

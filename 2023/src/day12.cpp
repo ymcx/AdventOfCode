@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   for (string line : lines) {
     vector<string> parts = split_space(line);
     string sequence = parts[0];
-    vector<int> amounts = filter_map(split(parts[1], ","), parse_int);
+    vector<int> amounts = filter_map(split_comma(parts[1]), parse_int);
 
     p1 += count(amounts, sequence);
 

@@ -79,7 +79,7 @@ int solve(const vector<string> &lines, bool p2) {
   unordered_map<string, int> weights;
 
   for (string line : lines) {
-    vector<string> parts = split(line, " ");
+    vector<string> parts = split_space(line);
 
     string cards = parts[0];
     weights[cards] = stoi(parts[1]);
