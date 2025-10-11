@@ -1,5 +1,6 @@
 #include "misc/io.h"
 #include "misc/point.h"
+#include "misc/vector.h"
 #include <queue>
 #include <ranges>
 #include <string>
@@ -56,76 +57,97 @@ pair<unordered_map<Point, char>, Point> parse_board(string path) {
 
 int main(int argc, char *argv[]) {
   auto [board, dimensions] = parse_board(argv[1]);
-  unordered_set<DirectionalPoint> been;
-  queue<DirectionalPoint> to_search;
-  to_search.push(DirectionalPoint(0, 0, RIGHT));
-  while (!to_search.empty()) {
-    auto player = to_search.front();
-    to_search.pop();
-    // println(position);
-
-    if (player.x < 0 || player.y < 0 || player.x >= dimensions.x ||
-        player.y >= dimensions.y || been.contains(player)) {
-      continue;
+  int maxi = 0;
+  vector<DirectionalPoint> lol;
+  DirectionalPoint pp = DirectionalPoint(0,0,RIGHT);
+  while (true) {
+    if (contains(lol, {pp.y,pp.x,(pp.direction+1)%4})) {
+      break;
     }
-    been.insert(player);
+    if (pp.x < 0 || pp.y < 0 || pp.x >= dimensions.x || pp.y >= dimensions.y) {
+      pp.move_inplace((pp.direction + 2) % 4);
+      pp.move_inplace((pp.direction + 3) % 4);
+    }
+    lol.push_back({pp.y,pp.x,(pp.direction+1)%4});
+    println(pp);
+    pp.move_inplace(pp.direction);
+  }
+  for (DirectionalPoint xd : lol) {
+    unordered_set<DirectionalPoint> been;
+    queue<DirectionalPoint> to_search;
+    to_search.push(xd);
+    while (!to_search.empty()) {
+      auto player = to_search.front();
+      to_search.pop();
+      // println(position);
 
-    if (board.contains({player.y, player.x})) {
-      switch (board[{player.y, player.x}]) {
-      case ('|'):
-        if (player.direction == UP || player.direction == DOWN) {
-          to_search.push(player.move(player.direction));
-        } else {
-          to_search.push(player.move(UP));
-          to_search.push(player.move(DOWN));
-        }
-        break;
-      case ('-'):
-        if (player.direction == RIGHT || player.direction == LEFT) {
-          to_search.push(player.move(player.direction));
-        } else {
-          to_search.push(player.move(RIGHT));
-          to_search.push(player.move(LEFT));
-        }
-        break;
-      case ('/'):
-        if (player.direction == RIGHT) {
-          to_search.push(player.move(UP));
-        }
-        if (player.direction == DOWN) {
-          to_search.push(player.move(LEFT));
-        }
-        if (player.direction == UP) {
-          to_search.push(player.move(RIGHT));
-        }
-        if (player.direction == LEFT) {
-          to_search.push(player.move(DOWN));
-        }
-        break;
-      case ('\\'):
-        if (player.direction == RIGHT) {
-          to_search.push(player.move(DOWN));
-        }
-        if (player.direction == DOWN) {
-          to_search.push(player.move(RIGHT));
-        }
-        if (player.direction == UP) {
-          to_search.push(player.move(LEFT));
-        }
-        if (player.direction == LEFT) {
-          to_search.push(player.move(UP));
-        }
-
-        break;
+      if (player.x < 0 || player.y < 0 || player.x >= dimensions.x ||
+          player.y >= dimensions.y || been.contains(player)) {
+        continue;
       }
-      continue;
-    }
+      been.insert(player);
 
-    to_search.push(player.move(player.direction));
+      if (board.contains({player.y, player.x})) {
+        switch (board[{player.y, player.x}]) {
+        case ('|'):
+          if (player.direction == UP || player.direction == DOWN) {
+            to_search.push(player.move(player.direction));
+          } else {
+            to_search.push(player.move(UP));
+            to_search.push(player.move(DOWN));
+          }
+          break;
+        case ('-'):
+          if (player.direction == RIGHT || player.direction == LEFT) {
+            to_search.push(player.move(player.direction));
+          } else {
+            to_search.push(player.move(RIGHT));
+            to_search.push(player.move(LEFT));
+          }
+          break;
+        case ('/'):
+          if (player.direction == RIGHT) {
+            to_search.push(player.move(UP));
+          }
+          if (player.direction == DOWN) {
+            to_search.push(player.move(LEFT));
+          }
+          if (player.direction == UP) {
+            to_search.push(player.move(RIGHT));
+          }
+          if (player.direction == LEFT) {
+            to_search.push(player.move(DOWN));
+          }
+          break;
+        case ('\\'):
+          if (player.direction == RIGHT) {
+            to_search.push(player.move(DOWN));
+          }
+          if (player.direction == DOWN) {
+            to_search.push(player.move(RIGHT));
+          }
+          if (player.direction == UP) {
+            to_search.push(player.move(LEFT));
+          }
+          if (player.direction == LEFT) {
+            to_search.push(player.move(UP));
+          }
+
+          break;
+        }
+        continue;
+      }
+
+      to_search.push(player.move(player.direction));
+    }
+    unordered_set<Point> been2;
+    for (DirectionalPoint p : been) {
+      been2.insert({p.y, p.x});
+    }
+    // println(been2.size());
+    if (been2.size() > maxi) {
+      maxi = been2.size();
+    }
   }
-  unordered_set<Point> been2;
-  for (DirectionalPoint p : been) {
-    been2.insert({p.y, p.x});
-  }
-  println(been2.size());
+  println(maxi);
 }
