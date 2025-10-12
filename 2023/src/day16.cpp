@@ -1,6 +1,6 @@
 #include "misc/io.h"
 #include "misc/point.h"
-#include "misc/vector.h"
+#include <algorithm>
 #include <queue>
 #include <ranges>
 #include <string>
@@ -12,142 +12,144 @@ using namespace std;
 pair<unordered_map<Point, char>, Point> parse_board(string path) {
   vector<string> lines = read_lines(path);
   unordered_map<Point, char> board;
-  int max_y = lines.size();
-  int max_x = lines[0].size();
-  Point dimensions = Point(max_y, max_x);
-  for (const auto [y, line] : views::enumerate(lines)) {
-    for (const auto [x, item] : views::enumerate(line)) {
-      Point point = Point(y, x);
-      switch (item) {
-      case ('|'):
-      case ('-'):
-      case ('/'):
-      case ('\\'):
+  Point dimensions = Point(lines.size(), lines[0].size());
+  string symbols = "|-/\\";
+
+  for (auto [y, line] : views::enumerate(lines)) {
+    for (auto [x, item] : views::enumerate(line)) {
+      if (symbols.contains(item)) {
+        Point point = Point(y, x);
         board[point] = item;
-        break;
       }
     }
   }
+
   return {board, dimensions};
 }
 
-// const int RIGHT = 0;
-// const int DOWN = 1;
-// const int LEFT = 2;
-// const int UP = 3;
+unordered_set<DirectionalPoint> get_starts(Point dimensions) {
+  unordered_set<DirectionalPoint> starts;
 
-// DirectionalPoint move_to(DirectionalPoint player, int direction) {
-//   switch (direction) {
-//   case (RIGHT):
-//     player.x += 1;
-//     break;
-//   case (DOWN):
-//     player.y += 1;
-//     break;
-//   case (LEFT):
-//     player.x -= 1;
-//     break;
-//   case (UP):
-//     player.y -= 1;
-//     break;
-//   }
-//   player.direction = direction;
-//   return player;
-// }
+  for (int y = 0; y < dimensions.y; ++y) {
+    starts.insert({y, 0, RIGHT});
+    starts.insert({y, dimensions.x - 1, LEFT});
+  }
+  for (int x = 0; x < dimensions.x; ++x) {
+    starts.insert({0, x, DOWN});
+    starts.insert({dimensions.y - 1, x, UP});
+  }
+
+  return starts;
+}
+
+int next_directions_slash(int direction) {
+  switch (direction) {
+  case LEFT:
+    return DOWN;
+  case RIGHT:
+    return UP;
+  case UP:
+    return RIGHT;
+  case DOWN:
+    return LEFT;
+  default:
+    return -1;
+  }
+}
+
+array<int, 2> next_directions_forwardslash(int direction) {
+  direction = next_directions_slash(direction);
+  return {direction, -1};
+}
+
+array<int, 2> next_directions_backslash(int direction) {
+  direction = (next_directions_slash(direction) + 2) % 4;
+  return {direction, -1};
+}
+
+array<int, 2> next_directions_beam(int direction) {
+  switch (direction) {
+  case LEFT:
+  case RIGHT:
+    return {UP, DOWN};
+  default:
+    return {direction, -1};
+  }
+}
+
+array<int, 2> next_directions_hyphen(int direction) {
+  switch (direction) {
+  case UP:
+  case DOWN:
+    return {LEFT, RIGHT};
+  default:
+    return {direction, -1};
+  }
+}
+
+array<int, 2> next_directions(char item, int direction) {
+  switch (item) {
+  case '|':
+    return next_directions_beam(direction);
+  case '-':
+    return next_directions_hyphen(direction);
+  case '/':
+    return next_directions_forwardslash(direction);
+  case '\\':
+    return next_directions_backslash(direction);
+  default:
+    return {direction, -1};
+  }
+}
+
+int solve(DirectionalPoint start, Point dimensions,
+          const unordered_map<Point, char> &board) {
+  unordered_set<Point> positions;
+  unordered_set<DirectionalPoint> states;
+  queue<DirectionalPoint> unvisited({start});
+
+  while (!unvisited.empty()) {
+    DirectionalPoint state = unvisited.front();
+    unvisited.pop();
+
+    if (!state.is_valid(dimensions) || states.contains(state)) {
+      continue;
+    }
+
+    Point position = state.get_position();
+    states.insert(state);
+    positions.insert(position);
+
+    char item = board.contains(position) ? board.at(position) : '.';
+    array<int, 2> directions = next_directions(item, state.direction);
+    for (int direction : directions) {
+      DirectionalPoint state_next = state.move(direction);
+      unvisited.push(state_next);
+    }
+  }
+
+  return positions.size();
+}
+
+int solve(const unordered_set<DirectionalPoint> &starts, Point dimensions,
+          const unordered_map<Point, char> &board) {
+  int result = 0;
+
+  for (DirectionalPoint start : starts) {
+    int potential = solve(start, dimensions, board);
+    result = max(result, potential);
+  }
+
+  return result;
+}
 
 int main(int argc, char *argv[]) {
   auto [board, dimensions] = parse_board(argv[1]);
-  int maxi = 0;
-  vector<DirectionalPoint> lol;
-  DirectionalPoint pp = DirectionalPoint(0,0,RIGHT);
-  while (true) {
-    if (contains(lol, {pp.y,pp.x,(pp.direction+1)%4})) {
-      break;
-    }
-    if (pp.x < 0 || pp.y < 0 || pp.x >= dimensions.x || pp.y >= dimensions.y) {
-      pp.move_inplace((pp.direction + 2) % 4);
-      pp.move_inplace((pp.direction + 3) % 4);
-    }
-    lol.push_back({pp.y,pp.x,(pp.direction+1)%4});
-    println(pp);
-    pp.move_inplace(pp.direction);
-  }
-  for (DirectionalPoint xd : lol) {
-    unordered_set<DirectionalPoint> been;
-    queue<DirectionalPoint> to_search;
-    to_search.push(xd);
-    while (!to_search.empty()) {
-      auto player = to_search.front();
-      to_search.pop();
-      // println(position);
+  DirectionalPoint start = DirectionalPoint(0, 0, RIGHT);
+  unordered_set<DirectionalPoint> starts = get_starts(dimensions);
 
-      if (player.x < 0 || player.y < 0 || player.x >= dimensions.x ||
-          player.y >= dimensions.y || been.contains(player)) {
-        continue;
-      }
-      been.insert(player);
+  int p1 = solve(start, dimensions, board);
+  int p2 = solve(starts, dimensions, board);
 
-      if (board.contains({player.y, player.x})) {
-        switch (board[{player.y, player.x}]) {
-        case ('|'):
-          if (player.direction == UP || player.direction == DOWN) {
-            to_search.push(player.move(player.direction));
-          } else {
-            to_search.push(player.move(UP));
-            to_search.push(player.move(DOWN));
-          }
-          break;
-        case ('-'):
-          if (player.direction == RIGHT || player.direction == LEFT) {
-            to_search.push(player.move(player.direction));
-          } else {
-            to_search.push(player.move(RIGHT));
-            to_search.push(player.move(LEFT));
-          }
-          break;
-        case ('/'):
-          if (player.direction == RIGHT) {
-            to_search.push(player.move(UP));
-          }
-          if (player.direction == DOWN) {
-            to_search.push(player.move(LEFT));
-          }
-          if (player.direction == UP) {
-            to_search.push(player.move(RIGHT));
-          }
-          if (player.direction == LEFT) {
-            to_search.push(player.move(DOWN));
-          }
-          break;
-        case ('\\'):
-          if (player.direction == RIGHT) {
-            to_search.push(player.move(DOWN));
-          }
-          if (player.direction == DOWN) {
-            to_search.push(player.move(RIGHT));
-          }
-          if (player.direction == UP) {
-            to_search.push(player.move(LEFT));
-          }
-          if (player.direction == LEFT) {
-            to_search.push(player.move(UP));
-          }
-
-          break;
-        }
-        continue;
-      }
-
-      to_search.push(player.move(player.direction));
-    }
-    unordered_set<Point> been2;
-    for (DirectionalPoint p : been) {
-      been2.insert({p.y, p.x});
-    }
-    // println(been2.size());
-    if (been2.size() > maxi) {
-      maxi = been2.size();
-    }
-  }
-  println(maxi);
+  assert_print(p1, p2, 7798, 8026);
 }

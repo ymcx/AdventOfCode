@@ -6,10 +6,10 @@
 
 using namespace std;
 
-const int RIGHT = 0;
-const int DOWN = 1;
-const int LEFT = 2;
-const int UP = 3;
+constexpr int RIGHT = 0;
+constexpr int DOWN = 1;
+constexpr int LEFT = 2;
+constexpr int UP = 3;
 
 struct Point {
   int y, x;
@@ -28,6 +28,10 @@ struct Point {
   friend ostream &operator<<(ostream &os, const Point &p) {
     os << "(" << p.y << ", " << p.x << ")";
     return os;
+  }
+
+  bool is_valid(Point dimensions) {
+    return y >= 0 && x >= 0 && y < dimensions.y && x < dimensions.x;
   }
 };
 
@@ -82,6 +86,13 @@ struct DirectionalPoint {
     new_point.move_inplace(new_direction);
     return new_point;
   }
+
+  bool is_valid(Point dimensions) {
+    return y >= 0 && x >= 0 && y < dimensions.y && x < dimensions.x &&
+           0 <= direction && direction <= 3;
+  }
+
+  Point get_position() { return Point(this->y, this->x); }
 };
 
 namespace std {
