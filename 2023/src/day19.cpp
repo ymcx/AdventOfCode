@@ -8,7 +8,7 @@
 #include <vector>
 
 using namespace std;
-using Workflow = vector<tuple<char, bool, int, string>>;
+using Workflow = vector<tuple<char, bool, long, string>>;
 using Workflows = unordered_map<string, Workflow>;
 using Rating = vector<long>;
 using Ratings = vector<Rating>;
@@ -35,7 +35,7 @@ Workflows parse_workflows(string input) {
 
       char argument = equation[0];
       bool op = equation[1] == '<';
-      int numbers = parse_int(equation).value();
+      long numbers = parse_long(equation).value();
 
       workflows[key].emplace_back(argument, op, numbers, destination);
     }
@@ -65,7 +65,7 @@ pair<Workflows, Ratings> parse_instructions(string path) {
   return {workflows, ratings};
 }
 
-bool equation_result(char argument, bool op, int numbers,
+bool equation_result(char argument, bool op, long numbers,
                      const Rating &rating) {
   int index = strchr("xmas", argument) - "xmas";
   return op ? rating[index] < numbers : rating[index] > numbers;
@@ -96,86 +96,78 @@ bool is_valid(const Workflows &workflows, const Rating &rating) {
   }
 }
 
-long solve_p1(const Ratings &ratings, const Workflows &workflows) {
-  long total = 0;
-  for (auto rating : ratings) {
-    bool valid = is_valid(workflows, rating);
-    if (valid) {
-      total += sum(rating);
+long solve_p1(const Workflows &workflows, const Ratings &ratings) {
+  long result = 0;
+
+  for (Rating rating : ratings) {
+    if (is_valid(workflows, rating)) {
+      result += sum(rating);
     }
   }
 
-  return total;
+  return result;
 }
 
-long solve_p2(const Ratings &ratings, const Workflows &workflows) {
-  long total = 0;
-
-  vector<int> sx = {0};
-  vector<int> sm = {0};
-  vector<int> sa = {0};
-  vector<int> ss = {0};
+unordered_map<char, Rating> collect_rating_borders(const Workflows &workflows) {
+  unordered_map<char, Rating> borders = {
+      {'x', {0}}, {'m', {0}}, {'a', {0}}, {'s', {0}}};
 
   for (auto [_, workflow] : workflows) {
-    for (auto [c, op, in, _] : workflow) {
-      switch (c) {
-      case 'x':
-        sx.push_back(op ? in - 1 : in);
-        sx.push_back(op ? in - 1 : in);
-        break;
-      case 'm':
-        sm.push_back(op ? in - 1 : in);
-        sm.push_back(op ? in - 1 : in);
-        break;
-      case 'a':
-        sa.push_back(op ? in - 1 : in);
-        sa.push_back(op ? in - 1 : in);
-        break;
-      case 's':
-        ss.push_back(op ? in - 1 : in);
-        ss.push_back(op ? in - 1 : in);
-        break;
+    for (auto [argument, op, numbers, _] : workflow) {
+      if (numbers == -1) {
+        continue;
       }
+
+      long value = op ? numbers - 1 : numbers;
+      borders[argument].push_back(value);
     }
   }
 
-  sx.push_back(4000);
-  sm.push_back(4000);
-  sa.push_back(4000);
-  ss.push_back(4000);
+  for (auto &[_, borders] : borders) {
+    sort(borders.begin(), borders.end());
+    borders.push_back(4000);
+  }
 
-  sort(sx.begin(), sx.end());
-  sort(sm.begin(), sm.end());
-  sort(sa.begin(), sa.end());
-  sort(ss.begin(), ss.end());
+  return borders;
+}
 
-  for (int xi = 0; xi < sx.size(); xi += 2) {
-    for (int mi = 0; mi < sm.size(); mi += 2) {
-      for (int ai = 0; ai < sa.size(); ai += 2) {
-        for (int si = 0; si < ss.size(); si += 2) {
+long solve_p2(const Workflows &workflows, const Ratings &ratings) {
+  unordered_map<char, Rating> borders = collect_rating_borders(workflows);
+  long result = 0;
 
-          Rating rating_last = {sx[xi + 0], sm[mi + 0], sa[ai + 0], ss[si + 0]};
-          Rating rating = {sx[xi + 1], sm[mi + 1], sa[ai + 1], ss[si + 1]};
+  for (int x = 0; x < borders['x'].size() - 1; ++x) {
+    long x0 = borders['x'][x];
+    long x1 = borders['x'][x + 1];
 
+    for (int m = 0; m < borders['m'].size() - 1; ++m) {
+      long m0 = borders['m'][m];
+      long m1 = borders['m'][m + 1];
+
+      for (int a = 0; a < borders['a'].size() - 1; ++a) {
+        long a0 = borders['a'][a];
+        long a1 = borders['a'][a + 1];
+
+        for (int s = 0; s < borders['s'].size() - 1; ++s) {
+          long s0 = borders['s'][s];
+          long s1 = borders['s'][s + 1];
+
+          Rating rating = {x1, m1, a1, s1};
           if (is_valid(workflows, rating)) {
-            total += ((rating.at(0) - rating_last.at(0)) *
-                      (rating.at(1) - rating_last.at(1)) *
-                      (rating.at(2) - rating_last.at(2)) *
-                      (rating.at(3) - rating_last.at(3)));
+            result += (x1 - x0) * (m1 - m0) * (a1 - a0) * (s1 - s0);
           }
         }
       }
     }
   }
 
-  return total;
+  return result;
 }
 
 int main(int argc, char *argv[]) {
   auto [workflows, ratings] = parse_instructions(argv[1]);
 
-  long p1 = solve_p1(ratings, workflows);
-  long p2 = solve_p2(ratings, workflows);
+  long p1 = solve_p1(workflows, ratings);
+  long p2 = solve_p2(workflows, ratings);
 
   assert_print(p1, p2, 19114L, 167409079868000L);
 }
