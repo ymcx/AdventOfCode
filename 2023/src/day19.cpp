@@ -1,17 +1,21 @@
 #include "misc/io.h"
 #include "misc/string.h"
 #include "misc/vector.h"
-#include <algorithm>
+#include <boost/numeric/interval.hpp>
 #include <cstring>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+using namespace boost::numeric;
 using namespace std;
+
 using Workflow = vector<tuple<char, bool, long, string>>;
 using Workflows = unordered_map<string, Workflow>;
 using Rating = vector<long>;
 using Ratings = vector<Rating>;
+using Interval = interval<int>;
+using Intervals = vector<Interval>;
 
 Workflows parse_workflows(string input) {
   Workflows workflows;
@@ -108,66 +112,86 @@ long solve_p1(const Workflows &workflows, const Ratings &ratings) {
   return result;
 }
 
-unordered_map<char, Rating> collect_rating_borders(const Workflows &workflows) {
-  unordered_map<char, Rating> borders = {
-      {'x', {0}}, {'m', {0}}, {'a', {0}}, {'s', {0}}};
+// https://github.com/iglesias/coding-challenges
+Intervals filter_intervals(const Intervals &intervals, int pivot,
+                           bool greater_than, bool restricted) {
+  Intervals output;
+  Interval filter =
+      restricted
+          ? (greater_than ? interval(1, pivot - 1) : interval(pivot + 1, 4000))
+          : (greater_than ? interval(pivot, 4000) : interval(1, pivot));
 
-  for (auto [_, workflow] : workflows) {
-    for (auto [argument, op, numbers, _] : workflow) {
-      if (numbers == -1) {
-        continue;
-      }
-
-      long value = op ? numbers - 1 : numbers;
-      borders[argument].push_back(value);
-    }
+  for (Interval interval : intervals) {
+    interval = intersect(interval, filter);
+    output.push_back(interval);
   }
 
-  for (auto &[_, borders] : borders) {
-    sort(borders.begin(), borders.end());
-    borders.push_back(4000);
-  }
-
-  return borders;
+  return output;
 }
 
-long solve_p2(const Workflows &workflows, const Ratings &ratings) {
-  unordered_map<char, Rating> borders = collect_rating_borders(workflows);
-  long result = 0;
+long sum(const unordered_map<char, Intervals> &intervals) {
+  Interval x = intervals.at('x').at(0);
+  Interval m = intervals.at('m').at(0);
+  Interval a = intervals.at('a').at(0);
+  Interval s = intervals.at('s').at(0);
 
-  for (int x = 0; x < borders['x'].size() - 1; ++x) {
-    long x0 = borders['x'][x];
-    long x1 = borders['x'][x + 1];
+  long xl = x.lower();
+  long ml = m.lower();
+  long al = a.lower();
+  long sl = s.lower();
 
-    for (int m = 0; m < borders['m'].size() - 1; ++m) {
-      long m0 = borders['m'][m];
-      long m1 = borders['m'][m + 1];
+  long xu = x.upper();
+  long mu = m.upper();
+  long au = a.upper();
+  long su = s.upper();
 
-      for (int a = 0; a < borders['a'].size() - 1; ++a) {
-        long a0 = borders['a'][a];
-        long a1 = borders['a'][a + 1];
+  return (xu - xl + 1) * (mu - ml + 1) * (au - al + 1) * (su - sl + 1);
+}
 
-        for (int s = 0; s < borders['s'].size() - 1; ++s) {
-          long s0 = borders['s'][s];
-          long s1 = borders['s'][s + 1];
+long apply(string destination, unordered_map<char, Intervals> intervals,
+           const Workflows &workflows, long result) {
+  if (destination == "A") {
+    return result + sum(intervals);
+  }
 
-          Rating rating = {x1, m1, a1, s1};
-          if (is_valid(workflows, rating)) {
-            result += (x1 - x0) * (m1 - m0) * (a1 - a0) * (s1 - s0);
-          }
-        }
-      }
+  if (destination == "R") {
+    return result;
+  }
+
+  Workflow workflow = workflows.at(destination);
+  for (auto [argument, op, numbers, destination] : workflow) {
+    if (numbers == -1) {
+      return apply(destination, intervals, workflows, result);
     }
+
+    unordered_map<char, Intervals> intervals_restricted = intervals;
+    intervals_restricted[argument] =
+        filter_intervals(intervals[argument], numbers, op, true);
+    intervals[argument] =
+        filter_intervals(intervals[argument], numbers, op, false);
+
+    result = apply(destination, intervals_restricted, workflows, result);
   }
 
   return result;
+}
+
+long solve_p2(const Workflows &workflows) {
+  unordered_map<char, Intervals> intervals = {
+      {'x', {{1, 4000}}},
+      {'m', {{1, 4000}}},
+      {'a', {{1, 4000}}},
+      {'s', {{1, 4000}}},
+  };
+
+  return apply("in", intervals, workflows, 0);
 }
 
 int main(int argc, char *argv[]) {
   auto [workflows, ratings] = parse_instructions(argv[1]);
 
   long p1 = solve_p1(workflows, ratings);
-  long p2 = solve_p2(workflows, ratings);
+  long p2 = solve_p2(workflows);
 
-  assert_print(p1, p2, 19114L, 167409079868000L);
+  assert_print(p1, p2, 389114L, 125051049836302L);
 }
