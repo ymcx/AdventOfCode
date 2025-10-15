@@ -1,5 +1,6 @@
 #include "misc/io.h"
 #include "misc/string.h"
+#include "misc/vector.h"
 #include <queue>
 #include <regex>
 #include <string>
@@ -13,9 +14,11 @@ using Module =
     tuple<char, bool, unordered_set<string>, unordered_map<string, bool>>;
 using Modules = unordered_map<string, Module>;
 using Queue = queue<tuple<string, bool, string>>;
+using Connections = unordered_map<string, int>;
 
-Modules parse_modules(string path) {
+pair<Modules, Connections> parse_modules(string path) {
   Modules modules;
+  Connections rx_connections;
 
   for (string line : read_lines(path)) {
     vector<string> line_parts = split(line, " -> ");
@@ -31,14 +34,30 @@ Modules parse_modules(string path) {
   }
 
   for (auto [module, data] : modules) {
-    auto [_, _, outputs, _] = data;
+    auto [_, _, outputs, inputs] = data;
     for (string output : outputs) {
-      auto &[_, _, _, inputs] = modules[output];
-      inputs[module] = false;
+      auto &[_, _, _, output_inputs] = modules[output];
+      output_inputs[module] = false;
+    }
+
+    if (module != "rx") {
+      continue;
+    }
+
+    // Find the four modules that are connected
+    // to a module which is connected to rx
+    string input_module = inputs.begin()->first;
+    for (auto [module, data] : modules) {
+      auto [_, _, outputs, _] = data;
+      for (string output : outputs) {
+        if (output == input_module) {
+          rx_connections[module] = 0;
+        }
+      }
     }
   }
 
-  return modules;
+  return {modules, rx_connections};
 }
 
 Queue zap(Modules &modules, string sender, string receiver, bool high_pulse,
@@ -71,18 +90,20 @@ Queue zap(Modules &modules, string sender, string receiver, bool high_pulse,
 }
 
 int main(int argc, char *argv[]) {
-  Modules modules = parse_modules(argv[1]);
+  auto [modules, rx_connections] = parse_modules(argv[1]);
+  int lows = 0, highs = 0;
+  long p1 = 0, p2 = 1;
 
-  int iterations = 1000;
-  int lows = iterations;
-  int highs = 0;
-
-  for (int i = 0; i < iterations; ++i) {
+  for (int i = 1; contains(values(rx_connections), 0); ++i) {
     Queue queue = zap(modules, "button", "broadcaster", false, lows, highs);
 
     while (!queue.empty()) {
       auto [receiver, high_pulse, sender] = queue.front();
       queue.pop();
+
+      if (!high_pulse && contains(keys(rx_connections), receiver)) {
+        rx_connections[receiver] = i;
+      }
 
       Queue queue_new = zap(modules, sender, receiver, high_pulse, lows, highs);
       while (!queue_new.empty()) {
@@ -90,8 +111,15 @@ int main(int argc, char *argv[]) {
         queue_new.pop();
       }
     }
+
+    if (i == 1000) {
+      p1 = (lows + 1000) * highs;
+    }
   }
 
-  int p1 = lows * highs;
-  println(p1);
+  for (auto [key, value] : rx_connections) {
+    p2 = lcm(p2, value);
+  }
+
+  assert_print(p1, p2, 812721756L, 233338595643977L);
 }
