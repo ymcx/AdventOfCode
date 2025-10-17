@@ -60,6 +60,20 @@ struct brick {
   }
 };
 
+namespace std {
+template <> struct hash<brick> {
+  size_t operator()(const brick &b) const {
+    size_t h1 = hash<int>{}(b.start[0]);
+    size_t h2 = hash<int>{}(b.start[1]);
+    size_t h3 = hash<int>{}(b.start[2]);
+    size_t h4 = hash<int>{}(b.end[0]);
+    size_t h5 = hash<int>{}(b.end[1]);
+    size_t h6 = hash<int>{}(b.end[2]);
+    return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3) ^ (h5 << 4) ^ (h6 << 5);
+  }
+};
+} // namespace std
+
 struct bricks {
   vector<brick> all_bricks;
 
@@ -73,8 +87,11 @@ struct bricks {
 
   // Get the lowest Z to which the brick can drop to
   int can_drop_to(const brick &br) {
-    for (int new_z = br.start[2] - 1; new_z >= 1; --new_z) {
+    int final_z = 1;
+
+    for (int new_z = br.start[2]; new_z >= 1; --new_z) {
       const brick new_br = brick(br, new_z);
+      bool collides = false;
 
       for (const brick &old_br : all_bricks) {
         if (old_br == br) {
@@ -82,12 +99,17 @@ struct bricks {
         }
 
         if (old_br.collides_with(new_br)) {
-          return new_z + 1;
+          collides = true;
+          break;
         }
+      }
+
+      if (!collides) {
+        final_z = new_z;
       }
     }
 
-    return 1;
+    return final_z;
   }
 
   // Drop all bricks in the list to the lowest level
@@ -98,6 +120,35 @@ struct bricks {
 
       all_bricks[i] = brick(br, new_z);
     }
+  }
+
+  // Get amount of bricks that can be removed
+  int can_remove_amount() {
+    unordered_map<brick, int> collisions;
+
+    for (const brick &br : all_bricks) {
+      const brick new_br = brick(br, br.start[2] + 1);
+
+      for (const brick &other_br : all_bricks) {
+        if (other_br == br) {
+          continue;
+        }
+
+        if (other_br.collides_with(new_br)) {
+          ++collisions[other_br];
+        }
+      }
+    }
+
+    int cant_remove = 0;
+    for (auto [key, val] : collisions) {
+      if (val == 1) {
+        cant_remove += 1;
+      }
+    }
+
+    int amount = all_bricks.size() - cant_remove;
+    return amount;
   }
 };
 
@@ -119,33 +170,32 @@ void test2() {
 }
 
 void test3() {
-  bricks bs = bricks(vector<string>{"0,0,5~3,0,5"});
-  brick b = brick("0,0,8~0,3,8");
-  int new_z = bs.can_drop_to(b);
-
-  assert((new_z == 6));
-}
-
-void test4() {
   brick b1 = brick("0,0,1~0,0,2");
   brick b2 = brick("0,0,2~0,0,2");
-
-  assert((b1.collides_with(b2) == true));
 
   brick b3 = brick("0,0,1~0,0,2");
   brick b4 = brick("0,0,3~0,0,3");
 
+  brick b5 = brick("1,0,1~1,3,1");
+  brick b6 = brick("0,1,1~3,1,1");
+
+  brick b7 = brick("1,0,1~1,3,1");
+  brick b8 = brick("2,1,1~3,1,1");
+
+  assert((b1.collides_with(b2) == true));
   assert((b3.collides_with(b4) == false));
+  assert((b5.collides_with(b6) == true));
+  assert((b7.collides_with(b8) == false));
 }
 
-void test5() {
+void test4() {
   brick b1 = brick("0,0,8~0,3,8");
   brick b2 = brick(b1, 2);
 
   assert((b2 == brick("0,0,2~0,3,2")));
 }
 
-void test6() {
+void test5() {
   bricks bs = bricks(vector<string>{"0,0,5~1,0,5"});
   bs.drop_all();
   brick first = bs.all_bricks.at(0);
@@ -154,7 +204,7 @@ void test6() {
   assert((first.end == array<int, 3>{1, 0, 1}));
 }
 
-void test7() {
+void test6() {
   bricks bs = bricks(vector<string>{"0,0,5~3,0,5", "0,0,8~0,3,8"});
   bs.drop_all();
   brick first = bs.all_bricks.at(0);
@@ -167,6 +217,19 @@ void test7() {
   assert((second.end == array<int, 3>{0, 3, 2}));
 }
 
+void test7() {
+  bricks bs = bricks(vector<string>{"0,0,8~0,3,8", "0,0,5~3,0,5"});
+  bs.drop_all();
+  brick first = bs.all_bricks.at(0);
+  brick second = bs.all_bricks.at(1);
+
+  assert((first.start == array<int, 3>{0, 0, 1}));
+  assert((first.end == array<int, 3>{0, 3, 1}));
+
+  assert((second.start == array<int, 3>{0, 0, 2}));
+  assert((second.end == array<int, 3>{3, 0, 2}));
+}
+
 int main(const int argc, const char *argv[]) {
   test1();
   test2();
@@ -177,5 +240,8 @@ int main(const int argc, const char *argv[]) {
   test7();
 
   const vector<string> lines = read_lines(argv[1]);
-  const bricks all_bricks = bricks(lines);
+  bricks all_bricks = bricks(lines);
+  all_bricks.drop_all();
+  const int amount = all_bricks.can_remove_amount();
+  println(amount);
 }
