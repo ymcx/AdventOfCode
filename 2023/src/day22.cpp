@@ -87,11 +87,8 @@ struct bricks {
 
   // Get the lowest Z to which the brick can drop to
   int can_drop_to(const brick &br) {
-    int final_z = 1;
-
-    for (int new_z = br.start[2]; new_z >= 1; --new_z) {
+    for (int new_z = br.start[2] - 1; new_z >= 1; --new_z) {
       const brick new_br = brick(br, new_z);
-      bool collides = false;
 
       for (const brick &old_br : all_bricks) {
         if (old_br == br) {
@@ -99,24 +96,19 @@ struct bricks {
         }
 
         if (old_br.collides_with(new_br)) {
-          collides = true;
-          break;
+          return new_z + 1;
         }
-      }
-
-      if (!collides) {
-        final_z = new_z;
       }
     }
 
-    return final_z;
+    return 1;
   }
 
   // Drop all bricks in the list to the lowest level
   void drop_all() {
     for (int i = 0; i < all_bricks.size(); ++i) {
       const brick &br = all_bricks.at(i);
-      int new_z = can_drop_to(br);
+      const int new_z = can_drop_to(br);
 
       all_bricks[i] = brick(br, new_z);
     }
@@ -223,11 +215,39 @@ void test7() {
   brick first = bs.all_bricks.at(0);
   brick second = bs.all_bricks.at(1);
 
-  assert((first.start == array<int, 3>{0, 0, 1}));
-  assert((first.end == array<int, 3>{0, 3, 1}));
+  assert((first.start == array<int, 3>{0, 0, 6}));
+  assert((first.end == array<int, 3>{0, 3, 6}));
 
-  assert((second.start == array<int, 3>{0, 0, 2}));
-  assert((second.end == array<int, 3>{3, 0, 2}));
+  assert((second.start == array<int, 3>{0, 0, 1}));
+  assert((second.end == array<int, 3>{3, 0, 1}));
+}
+
+void test8() {
+  vector<string> lines1 = {"0,0,1~0,0,1", "1,1,1~1,1,1", "1,0,1~1,0,1",
+                           "0,1,1~0,1,1"};
+  bricks bs1 = bricks(lines1);
+  bs1.drop_all();
+  int amount1 = bs1.can_remove_amount();
+
+  vector<string> lines2 = {"0,0,1~0,0,1", "0,0,2~0,0,2"};
+  bricks bs2 = bricks(lines2);
+  bs2.drop_all();
+  int amount2 = bs2.can_remove_amount();
+
+  vector<string> lines3 = {"0,1,1~4,1,1", "0,2,1~4,2,1", "1,0,2~1,3,2"};
+  bricks bs3 = bricks(lines3);
+  bs3.drop_all();
+  int amount3 = bs3.can_remove_amount();
+
+  vector<string> lines4 = {"0,1,1~4,1,1", "1,0,2~1,3,2"};
+  bricks bs4 = bricks(lines4);
+  bs4.drop_all();
+  int amount4 = bs4.can_remove_amount();
+
+  assert((amount1 == 4));
+  assert((amount2 == 1));
+  assert((amount3 == 3));
+  assert((amount4 == 1));
 }
 
 int main(const int argc, const char *argv[]) {
@@ -238,6 +258,7 @@ int main(const int argc, const char *argv[]) {
   test5();
   test6();
   test7();
+  test8();
 
   const vector<string> lines = read_lines(argv[1]);
   bricks all_bricks = bricks(lines);
