@@ -116,31 +116,22 @@ struct bricks {
 
   // Get amount of bricks that can be removed
   int can_remove_amount() {
-    unordered_map<brick, int> collisions;
+    int count = 0;
 
-    for (const brick &br : all_bricks) {
-      const brick new_br = brick(br, br.start[2] + 1);
+    for (int i = 0; i < all_bricks.size(); ++i) {
+      bricks brs1 = *this;
 
-      for (const brick &other_br : all_bricks) {
-        if (other_br == br) {
-          continue;
-        }
+      brs1.all_bricks.erase(brs1.all_bricks.begin() + i);
+      bricks brs2 = brs1;
 
-        if (other_br.collides_with(new_br)) {
-          ++collisions[other_br];
-        }
+      brs1.drop_all();
+
+      if (brs1.all_bricks == brs2.all_bricks) {
+        ++count;
       }
     }
 
-    int cant_remove = 0;
-    for (auto [key, val] : collisions) {
-      if (val == 1) {
-        cant_remove += 1;
-      }
-    }
-
-    int amount = all_bricks.size() - cant_remove;
-    return amount;
+    return count;
   }
 };
 
@@ -244,10 +235,18 @@ void test8() {
   bs4.drop_all();
   int amount4 = bs4.can_remove_amount();
 
+  vector<string> lines5 = {"1,0,1~1,2,1", "0,0,2~2,0,2", "0,2,2~2,2,2",
+                           "0,0,3~0,2,3", "2,0,3~2,2,3", "0,1,4~2,1,4",
+                           "1,1,5~1,1,5"};
+  bricks bs5 = bricks(lines5);
+  bs5.drop_all();
+  int amount5 = bs5.can_remove_amount();
+
   assert((amount1 == 4));
   assert((amount2 == 1));
   assert((amount3 == 3));
   assert((amount4 == 1));
+  assert((amount5 == 5));
 }
 
 int main(const int argc, const char *argv[]) {
