@@ -86,7 +86,7 @@ struct bricks {
   }
 
   // Get the lowest Z to which the brick can drop to
-  int can_drop_to(const brick &br) {
+  brick drop(const brick &br) {
     for (int new_z = br.start[2] - 1; new_z >= 1; --new_z) {
       const brick new_br = brick(br, new_z);
 
@@ -96,21 +96,19 @@ struct bricks {
         }
 
         if (old_br.collides_with(new_br)) {
-          return new_z + 1;
+          return brick(br, new_z + 1);
         }
       }
     }
 
-    return 1;
+    return brick(br, 1);
   }
 
   // Drop all bricks in the list to the lowest level
   void drop_all() {
     for (int i = 0; i < all_bricks.size(); ++i) {
       const brick &br = all_bricks.at(i);
-      const int new_z = can_drop_to(br);
-
-      all_bricks[i] = brick(br, new_z);
+      all_bricks[i] = drop(br);
     }
   }
 
