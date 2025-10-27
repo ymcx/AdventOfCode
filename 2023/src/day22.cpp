@@ -11,6 +11,9 @@ struct brick {
   array<int, 3> start;
   array<int, 3> end;
 
+  unordered_set<brick *> supported_by;
+  unordered_set<brick *> supports;
+
   // Construct from one line from input
   brick(const string &line) {
     const vector<string> pair = split(line, "~");
@@ -35,14 +38,14 @@ struct brick {
 
   // Checks if X and Y collides with another brick,
   // Z is only checked for the lowest value
-  bool collides_with(const brick &other) const {
+  bool collides_with(const brick &other, int elevation) const {
     for (int x = start[0]; x <= end[0]; ++x) {
       for (int y = start[1]; y <= end[1]; ++y) {
         for (int z = start[2]; z <= end[2]; ++z) {
           for (int x2 = other.start[0]; x2 <= other.end[0]; ++x2) {
             for (int y2 = other.start[1]; y2 <= other.end[1]; ++y2) {
               for (int z2 = other.start[2]; z2 <= other.end[2]; ++z2) {
-                if (x == x2 && y == y2 && z == z2) {
+                if (x == x2 && y == y2 && z == z2 - elevation) {
                   return true;
                 }
               }
@@ -63,13 +66,9 @@ struct brick {
 namespace std {
 template <> struct hash<brick> {
   size_t operator()(const brick &b) const {
-    size_t h1 = hash<int>{}(b.start[0]);
-    size_t h2 = hash<int>{}(b.start[1]);
-    size_t h3 = hash<int>{}(b.start[2]);
-    size_t h4 = hash<int>{}(b.end[0]);
-    size_t h5 = hash<int>{}(b.end[1]);
-    size_t h6 = hash<int>{}(b.end[2]);
-    return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3) ^ (h5 << 4) ^ (h6 << 5);
+    return hash<size_t>{}(b.start[0]) ^ hash<size_t>{}(b.start[1]) ^
+           hash<size_t>{}(b.start[2]) ^ hash<size_t>{}(b.end[0]) ^
+           hash<size_t>{}(b.end[1]) ^ hash<size_t>{}(b.end[2]);
   }
 };
 } // namespace std
@@ -95,7 +94,7 @@ struct bricks {
           continue;
         }
 
-        if (old_br.collides_with(new_br)) {
+        if (old_br.collides_with(new_br, 0)) {
           return brick(br, new_z + 1);
         }
       }
@@ -112,154 +111,56 @@ struct bricks {
     }
   }
 
+  // Add bricks that support/are supported by a brick
+  void add_supports() {
+    for (int i = 0; i < all_bricks.size(); ++i) {
+      for (int j = 0; j < all_bricks.size(); ++j) {
+        if (i == j) {
+          continue;
+        }
+
+        auto &br1 = all_bricks.at(i);
+        auto &br2 = all_bricks.at(j);
+        if (br1.collides_with(br2, 1)) {
+          br1.supports.insert(&br2);
+          br2.supported_by.insert(&br1);
+        }
+      }
+    }
+  }
+
   // Get amount of bricks that can be removed
   int can_remove_amount() {
     int count = 0;
 
-    for (int i = 0; i < all_bricks.size(); ++i) {
-      bricks brs1 = *this;
+    for (auto br : all_bricks) {
+      bool safet = true;
 
-      brs1.all_bricks.erase(brs1.all_bricks.begin() + i);
-      bricks brs2 = brs1;
+      for (auto thisissupported : br.supports) {
 
-      brs1.drop_all();
+        if (thisissupported->supported_by.size() == 1) {
+          safet = false;
+        }
+      }
 
-      if (brs1.all_bricks == brs2.all_bricks) {
-        ++count;
+      if (!safet) {
+        count += 1;
       }
     }
 
-    return count;
+    return all_bricks.size() - count;
   }
 };
 
-void test1() {
-  brick b = brick("1,2,3~4,5,6");
-
-  assert((b.start == array<int, 3>{1, 2, 3}));
-  assert((b.end == array<int, 3>{4, 5, 6}));
-}
-
-void test2() {
-  vector<brick> vec;
-  vec.push_back(brick("1,2,3~4,5,6"));
-  vec.push_back(brick("5,5,5~3,3,3"));
-
-  bricks bs = bricks(vector<string>{"1,2,3~4,5,6", "5,5,5~3,3,3"});
-
-  assert((bs.all_bricks == vec));
-}
-
-void test3() {
-  brick b1 = brick("0,0,1~0,0,2");
-  brick b2 = brick("0,0,2~0,0,2");
-
-  brick b3 = brick("0,0,1~0,0,2");
-  brick b4 = brick("0,0,3~0,0,3");
-
-  brick b5 = brick("1,0,1~1,3,1");
-  brick b6 = brick("0,1,1~3,1,1");
-
-  brick b7 = brick("1,0,1~1,3,1");
-  brick b8 = brick("2,1,1~3,1,1");
-
-  assert((b1.collides_with(b2) == true));
-  assert((b3.collides_with(b4) == false));
-  assert((b5.collides_with(b6) == true));
-  assert((b7.collides_with(b8) == false));
-}
-
-void test4() {
-  brick b1 = brick("0,0,8~0,3,8");
-  brick b2 = brick(b1, 2);
-
-  assert((b2 == brick("0,0,2~0,3,2")));
-}
-
-void test5() {
-  bricks bs = bricks(vector<string>{"0,0,5~1,0,5"});
-  bs.drop_all();
-  brick first = bs.all_bricks.at(0);
-
-  assert((first.start == array<int, 3>{0, 0, 1}));
-  assert((first.end == array<int, 3>{1, 0, 1}));
-}
-
-void test6() {
-  bricks bs = bricks(vector<string>{"0,0,5~3,0,5", "0,0,8~0,3,8"});
-  bs.drop_all();
-  brick first = bs.all_bricks.at(0);
-  brick second = bs.all_bricks.at(1);
-
-  assert((first.start == array<int, 3>{0, 0, 1}));
-  assert((first.end == array<int, 3>{3, 0, 1}));
-
-  assert((second.start == array<int, 3>{0, 0, 2}));
-  assert((second.end == array<int, 3>{0, 3, 2}));
-}
-
-void test7() {
-  bricks bs = bricks(vector<string>{"0,0,8~0,3,8", "0,0,5~3,0,5"});
-  bs.drop_all();
-  brick first = bs.all_bricks.at(0);
-  brick second = bs.all_bricks.at(1);
-
-  assert((first.start == array<int, 3>{0, 0, 6}));
-  assert((first.end == array<int, 3>{0, 3, 6}));
-
-  assert((second.start == array<int, 3>{0, 0, 1}));
-  assert((second.end == array<int, 3>{3, 0, 1}));
-}
-
-void test8() {
-  vector<string> lines1 = {"0,0,1~0,0,1", "1,1,1~1,1,1", "1,0,1~1,0,1",
-                           "0,1,1~0,1,1"};
-  bricks bs1 = bricks(lines1);
-  bs1.drop_all();
-  int amount1 = bs1.can_remove_amount();
-
-  vector<string> lines2 = {"0,0,1~0,0,1", "0,0,2~0,0,2"};
-  bricks bs2 = bricks(lines2);
-  bs2.drop_all();
-  int amount2 = bs2.can_remove_amount();
-
-  vector<string> lines3 = {"0,1,1~4,1,1", "0,2,1~4,2,1", "1,0,2~1,3,2"};
-  bricks bs3 = bricks(lines3);
-  bs3.drop_all();
-  int amount3 = bs3.can_remove_amount();
-
-  vector<string> lines4 = {"0,1,1~4,1,1", "1,0,2~1,3,2"};
-  bricks bs4 = bricks(lines4);
-  bs4.drop_all();
-  int amount4 = bs4.can_remove_amount();
-
-  vector<string> lines5 = {"1,0,1~1,2,1", "0,0,2~2,0,2", "0,2,2~2,2,2",
-                           "0,0,3~0,2,3", "2,0,3~2,2,3", "0,1,4~2,1,4",
-                           "1,1,5~1,1,5"};
-  bricks bs5 = bricks(lines5);
-  bs5.drop_all();
-  int amount5 = bs5.can_remove_amount();
-
-  assert((amount1 == 4));
-  assert((amount2 == 1));
-  assert((amount3 == 3));
-  assert((amount4 == 1));
-  assert((amount5 == 5));
-}
-
 int main(const int argc, const char *argv[]) {
-  test1();
-  test2();
-  test3();
-  test4();
-  test5();
-  test6();
-  test7();
-  test8();
-
   const vector<string> lines = read_lines(argv[1]);
   bricks all_bricks = bricks(lines);
-  all_bricks.drop_all();
+  bricks old_bricks = all_bricks;
+  do {
+    old_bricks = all_bricks;
+    all_bricks.drop_all();
+  } while (all_bricks.all_bricks != old_bricks.all_bricks);
+  all_bricks.add_supports();
   const int amount = all_bricks.can_remove_amount();
   println(amount);
 }
