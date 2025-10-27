@@ -37,15 +37,18 @@ struct brick {
   }
 
   // Checks if X and Y collides with another brick,
-  // Z is only checked for the lowest value
-  bool collides_with(const brick &other, int elevation) const {
-    for (int x = start[0]; x <= end[0]; ++x) {
-      for (int y = start[1]; y <= end[1]; ++y) {
-        for (int z = start[2]; z <= end[2]; ++z) {
-          for (int x2 = other.start[0]; x2 <= other.end[0]; ++x2) {
-            for (int y2 = other.start[1]; y2 <= other.end[1]; ++y2) {
-              for (int z2 = other.start[2]; z2 <= other.end[2]; ++z2) {
-                if (x == x2 && y == y2 && z == z2 - elevation) {
+  bool collides_with(const brick &other, const bool &is_below) const {
+    for (int x0 = start[0]; x0 <= end[0]; ++x0) {
+      for (int y0 = start[1]; y0 <= end[1]; ++y0) {
+        for (int z0 = start[2]; z0 <= end[2]; ++z0) {
+          for (int x1 = other.start[0]; x1 <= other.end[0]; ++x1) {
+            for (int y1 = other.start[1]; y1 <= other.end[1]; ++y1) {
+              for (int z1 = other.start[2]; z1 <= other.end[2]; ++z1) {
+                const bool x_matches = x0 == x1;
+                const bool y_matches = y0 == y1;
+                const bool z_matches = z0 == z1 - is_below ? 1 : 0;
+
+                if (x_matches && y_matches && z_matches) {
                   return true;
                 }
               }
@@ -63,16 +66,6 @@ struct brick {
   }
 };
 
-namespace std {
-template <> struct hash<brick> {
-  size_t operator()(const brick &b) const {
-    return hash<size_t>{}(b.start[0]) ^ hash<size_t>{}(b.start[1]) ^
-           hash<size_t>{}(b.start[2]) ^ hash<size_t>{}(b.end[0]) ^
-           hash<size_t>{}(b.end[1]) ^ hash<size_t>{}(b.end[2]);
-  }
-};
-} // namespace std
-
 struct bricks {
   vector<brick> all_bricks;
 
@@ -86,16 +79,16 @@ struct bricks {
 
   // Get the lowest Z to which the brick can drop to
   brick drop(const brick &br) {
-    for (int new_z = br.start[2] - 1; new_z >= 1; --new_z) {
-      const brick new_br = brick(br, new_z);
+    for (int z = br.start[2]; z > 1; --z) {
+      const brick new_br = brick(br, z);
 
       for (const brick &old_br : all_bricks) {
         if (old_br == br) {
           continue;
         }
 
-        if (old_br.collides_with(new_br, 0)) {
-          return brick(br, new_z + 1);
+        if (old_br.collides_with(new_br, true)) {
+          return brick(br, z);
         }
       }
     }
@@ -105,9 +98,18 @@ struct bricks {
 
   // Drop all bricks in the list to the lowest level
   void drop_all() {
-    for (int i = 0; i < all_bricks.size(); ++i) {
-      const brick &br = all_bricks.at(i);
-      all_bricks[i] = drop(br);
+    bool changed = true;
+
+    while (changed) {
+      changed = false;
+
+      for (brick &br : all_bricks) {
+        const brick dropped = drop(br);
+        if (br != dropped) {
+          br = dropped;
+          changed = true;
+        }
+      }
     }
   }
 
@@ -119,11 +121,13 @@ struct bricks {
           continue;
         }
 
-        auto &br1 = all_bricks.at(i);
-        auto &br2 = all_bricks.at(j);
-        if (br1.collides_with(br2, 1)) {
-          br1.supports.insert(&br2);
-          br2.supported_by.insert(&br1);
+        brick &a = all_bricks.at(i);
+        brick &b = all_bricks.at(j);
+
+        if (a.collides_with(b, true)) {
+          // b rests on top of a
+          a.supports.insert(&b);
+          b.supported_by.insert(&a);
         }
       }
     }
@@ -131,36 +135,32 @@ struct bricks {
 
   // Get amount of bricks that can be removed
   int can_remove_amount() {
-    int count = 0;
+    int cant_remove = 0;
 
-    for (auto br : all_bricks) {
-      bool safet = true;
-
-      for (auto thisissupported : br.supports) {
-
-        if (thisissupported->supported_by.size() == 1) {
-          safet = false;
+    for (const brick &br : all_bricks) {
+      for (const brick *supported : br.supports) {
+        if (supported->supported_by.size() != 1) {
+          // brick is supported by multiple bricks, br could be removed
+          continue;
         }
-      }
 
-      if (!safet) {
-        count += 1;
+        // brick is supported by just one brick, br can't be removed
+        ++cant_remove;
+        break;
       }
     }
 
-    return all_bricks.size() - count;
+    return all_bricks.size() - cant_remove;
   }
 };
 
 int main(const int argc, const char *argv[]) {
   const vector<string> lines = read_lines(argv[1]);
   bricks all_bricks = bricks(lines);
-  bricks old_bricks = all_bricks;
-  do {
-    old_bricks = all_bricks;
-    all_bricks.drop_all();
-  } while (all_bricks.all_bricks != old_bricks.all_bricks);
+
+  all_bricks.drop_all();
   all_bricks.add_supports();
+
   const int amount = all_bricks.can_remove_amount();
   println(amount);
 }
