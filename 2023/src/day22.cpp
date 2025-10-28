@@ -2,6 +2,7 @@
 #include "misc/string.h"
 #include "misc/vector.h"
 #include <cassert>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -65,6 +66,20 @@ struct brick {
     return start == other.start && end == other.end;
   }
 };
+
+namespace std {
+template <> struct hash<brick> {
+  size_t operator()(const brick &br) const {
+    const size_t a = hash<int>{}(br.start[0]);
+    const size_t b = hash<int>{}(br.start[1]);
+    const size_t c = hash<int>{}(br.start[2]);
+    const size_t d = hash<int>{}(br.end[0]);
+    const size_t e = hash<int>{}(br.end[1]);
+    const size_t f = hash<int>{}(br.end[2]);
+    return (a << 0) ^ (b << 1) ^ (c << 2) ^ (d << 3) ^ (e << 4) ^ (f << 5);
+  }
+};
+} // namespace std
 
 struct bricks {
   vector<brick> all_bricks;
@@ -152,6 +167,54 @@ struct bricks {
 
     return all_bricks.size() - cant_remove;
   }
+
+  // Get the amount of bricks that would fall if br was to be removed
+  int would_fall_amount(const brick &br) {
+    unordered_set<brick> fallen({br});
+    queue<brick> to_travel;
+
+    // Visit all bricks that br supports
+    for (const brick *supported : br.supports) {
+      to_travel.push(*supported);
+    }
+
+    while (!to_travel.empty()) {
+      const brick br = to_travel.front();
+      to_travel.pop();
+
+      // Every brick that supported br has fallen
+      bool all_supporters_fallen = true;
+      for (const brick *supports : br.supported_by) {
+        if (!fallen.contains(*supports)) {
+          all_supporters_fallen = false;
+        };
+      }
+
+      // If so, add br to the list of fallen
+      // Also visit all bricks that br supports
+      if (all_supporters_fallen) {
+        fallen.insert(br);
+
+        for (const brick *supported : br.supports) {
+          to_travel.push(*supported);
+        }
+      }
+    }
+
+    return fallen.size();
+  }
+
+  // Get the amount of bricks that would fall
+  // if every brick would be removed one by one
+  int would_fall_amount() {
+    int amount = 0;
+
+    for (const brick &br : all_bricks) {
+      amount += would_fall_amount(br);
+    }
+
+    return amount - all_bricks.size();
+  }
 };
 
 int main(const int argc, const char *argv[]) {
@@ -161,6 +224,8 @@ int main(const int argc, const char *argv[]) {
   all_bricks.drop_all();
   all_bricks.add_supports();
 
-  const int amount = all_bricks.can_remove_amount();
-  println(amount);
+  const int p1 = all_bricks.can_remove_amount();
+  const int p2 = all_bricks.would_fall_amount();
+
+  assert_print(p1, p2, 490, 96356);
 }
