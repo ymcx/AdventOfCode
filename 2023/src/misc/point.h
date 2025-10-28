@@ -35,39 +35,6 @@ struct Point {
   }
 };
 
-struct Point3D {
-  int y, x, z;
-
-  Point3D() : y(0), x(0), z(0) {}
-  Point3D(int y, int x, int z) : y(y), x(x), z(z) {}
-
-  bool operator==(const Point3D &p) const {
-    return x == p.x && y == p.y && z == p.z;
-  }
-
-  bool operator!=(const Point3D &p) const {
-    return x != p.x || y != p.y || z != p.z;
-  }
-
-  Point3D operator+(const Point3D &p) const {
-    return Point3D(x + p.x, y + p.y, z + p.z);
-  }
-
-  Point3D operator-(const Point3D &p) const {
-    return Point3D(z - p.z, y - p.y, z - p.z);
-  }
-
-  friend ostream &operator<<(ostream &os, const Point3D &p) {
-    os << "(" << p.x << ", " << p.y << ", " << p.z << ")";
-    return os;
-  }
-
-  bool is_valid(Point3D dimensions) {
-    return x >= 0 && y >= 0 && z >= 0 && x < dimensions.x && y < dimensions.y &&
-           z < dimensions.z;
-  }
-};
-
 struct DirectionalPoint {
   int y, x, direction;
 
@@ -134,15 +101,6 @@ template <> struct hash<Point> {
     size_t h1 = hash<int>{}(p.y);
     size_t h2 = hash<int>{}(p.x);
     return h1 ^ (h2 << 1);
-  }
-};
-
-template <> struct hash<Point3D> {
-  size_t operator()(const Point3D &p) const {
-    size_t h1 = hash<int>{}(p.y);
-    size_t h2 = hash<int>{}(p.x);
-    size_t h3 = hash<int>{}(p.z);
-    return h1 ^ (h2 << 1) ^ (h3 << 2);
   }
 };
 
