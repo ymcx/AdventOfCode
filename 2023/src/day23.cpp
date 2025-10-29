@@ -1,151 +1,110 @@
 #include "misc/io.h"
 #include "misc/point.h"
-#include <algorithm>
-#include <queue>
 #include <ranges>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 using namespace std;
 
-tuple<unordered_set<Point>, unordered_map<Point, char>, Point, Point, Point>
+constexpr array<Point, 4> DELTAS = {
+    Point(0, 1),
+    Point(1, 0),
+    Point(0, -1),
+    Point(-1, 0),
+};
+
+tuple<vector<vector<bool>>, vector<vector<int>>, Point, Point, Point>
 parse_board(const string &path) {
-  vector<string> lines = read_lines(path);
-  unordered_set<Point> walls;
-  unordered_map<Point, char> slopes;
+  const vector<string> lines = read_lines(path);
+  const Point dimensions = Point(lines.size(), lines[0].size());
+  vector<vector<bool>> walls(dimensions.y, vector<bool>(dimensions.x, false));
+  vector<vector<int>> slopes(dimensions.y, vector<int>(dimensions.x, -1));
   Point start;
   Point end;
-  Point dimensions = Point(lines.size(), lines[0].size());
 
-  for (auto [y, line] : views::enumerate(lines)) {
-    for (auto [x, item] : views::enumerate(line)) {
-      Point point = Point(y, x);
+  for (const auto &[y, line] : views::enumerate(lines)) {
+    for (const auto &[x, item] : views::enumerate(line)) {
       switch (item) {
       case '#':
-        walls.insert(point);
+        walls[y][x] = true;
         break;
       case '.':
         if (y == 0) {
-          start = point;
-        }
-        if (y == lines.size() - 1) {
-          end = point;
+          start = Point(y, x);
+        } else if (y == dimensions.y - 1) {
+          end = Point(y, x);
         }
         break;
       case '>':
-      case '<':
-      case '^':
+        slopes[y][x] = 0;
+        break;
       case 'v':
-        slopes[point] = item;
+        slopes[y][x] = 1;
+        break;
+      case '<':
+        slopes[y][x] = 2;
+        break;
+      case '^':
+        slopes[y][x] = 3;
         break;
       }
     }
   }
+
   return {walls, slopes, start, end, dimensions};
 }
 
-int get_longest_path(unordered_set<Point> &walls,
-                     unordered_map<Point, char> &slopes, Point start, Point end,
-                     Point dimensions, int startint,
+int get_longest_path(const vector<vector<bool>> &walls,
+                     const vector<vector<int>> &slopes, const Point &start,
+                     const Point &end, const Point &dimensions,
+                     const int &length, vector<vector<bool>> &visited,
+                     const bool &p2) {
+  if (start == end) {
+    return length;
+  }
 
-                     unordered_map<Point, int> visited
+  visited[start.y][start.x] = true;
+  int length_new = 0;
 
-) {
-  queue<pair<Point, int>> to_travel({{start, startint}});
+  if (!p2 && slopes[start.y][start.x] != -1) {
+    const int slope = slopes[start.y][start.x];
+    const Point next = start + DELTAS[slope];
 
-  int maxx = 0;
-  while (!to_travel.empty()) {
-
-    auto [point, cur] = to_travel.front();
-    to_travel.pop();
-
-    print(point);
-    print(" ");
-    print(cur);
-    println();
-
-    if (!point.is_valid(dimensions) || walls.contains(point) ||
-        (visited.contains(point))) {
-      continue;
+    if (next.is_valid(dimensions) && !walls[next.y][next.x] &&
+        !visited[next.y][next.x]) {
+      const int length_potential = get_longest_path(
+          walls, slopes, next, end, dimensions, length + 1, visited, p2);
+      length_new = max(length_new, length_potential);
     }
+  } else {
+    for (int slope = 0; slope < 4; ++slope) {
+      const Point next = start + DELTAS[slope];
 
-    if (point == end) {
-
-      maxx = std::max(maxx, cur);
-      continue;
-    }
-
-    visited.emplace(point, cur);
-    cur += 1;
-
-    if (slopes.contains(point)) {
-      int result2;
-      Point p;
-      switch (slopes[point]) {
-      case '>':
-
-        p = point + Point(0, 1);
-        result2 =
-            get_longest_path(walls, slopes, p, end, dimensions, cur, visited);
-        maxx = std::max(maxx, result2);
-        break;
-      case '<':
-
-        p = point + Point(0, -1);
-        result2 =
-            get_longest_path(walls, slopes, p, end, dimensions, cur, visited);
-        maxx = std::max(maxx, result2);
-        break;
-      case 'v':
-
-        p = point + Point(1, 0);
-        result2 =
-            get_longest_path(walls, slopes, p, end, dimensions, cur, visited);
-        maxx = std::max(maxx, result2);
-        break;
-      case '^':
-        p = point + Point(-1, 0);
-
-        result2 =
-            get_longest_path(walls, slopes, p, end, dimensions, cur, visited);
-        maxx = std::max(maxx, result2);
-        break;
+      if (next.is_valid(dimensions) && !walls[next.y][next.x] &&
+          !visited[next.y][next.x]) {
+        const int length_potential = get_longest_path(
+            walls, slopes, next, end, dimensions, length + 1, visited, p2);
+        length_new = max(length_new, length_potential);
       }
-      continue;
-    }
-
-    int a = 0;
-    auto list = {
-        Point(1, 0),
-        Point(-1, 0),
-        Point(0, 1),
-        Point(0, -1),
-    };
-    for (auto d : list) {
-      auto p = point + d;
-      if (!p.is_valid(dimensions) || walls.contains(p) ||
-          (visited.contains(p))) {
-        continue;
-      }
-
-      if (a > 1) {
-        int result =
-            get_longest_path(walls, slopes, p, end, dimensions, cur, visited);
-        maxx = std::max(maxx, result);
-
-      } else {
-        to_travel.emplace(point + d, cur);
-      }
-
-      ++a;
     }
   }
-  return maxx;
+
+  visited[start.y][start.x] = false;
+  return length_new;
 }
 
 int main(const int argc, const char *argv[]) {
-  auto [walls, slopes, start, end, dimensions] = parse_board(argv[1]);
-  int result = get_longest_path(walls, slopes, start, end, dimensions, 0, {});
-  println(result);
+  const auto [walls, slopes, start, end, dimensions] = parse_board(argv[1]);
+
+  vector<vector<bool>> visited_p1(dimensions.y,
+                                  vector<bool>(dimensions.x, false));
+  vector<vector<bool>> visited_p2(dimensions.y,
+                                  vector<bool>(dimensions.x, false));
+
+  const int p1 = get_longest_path(walls, slopes, start, end, dimensions, 0,
+                                  visited_p1, false);
+  const int p2 = get_longest_path(walls, slopes, start, end, dimensions, 0,
+                                  visited_p2, true);
+
+  assert_print(p1, p2, 2010, 6318);
 }
