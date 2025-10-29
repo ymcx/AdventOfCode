@@ -9,6 +9,8 @@ constexpr int DOWN = 1;
 constexpr int LEFT = 2;
 constexpr int UP = 3;
 
+using namespace std;
+
 struct Point {
   int y, x;
 
@@ -29,7 +31,7 @@ struct Point {
     return Point(y - p.y, x - p.x);
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const Point &p) {
+  friend ostream &operator<<(ostream &os, const Point &p) {
     os << "(" << p.y << ", " << p.x << ")";
     return os;
   }
@@ -62,7 +64,7 @@ struct DirectionalPoint {
     return DirectionalPoint(y - p.y, x - p.x, direction);
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const DirectionalPoint &p) {
+  friend ostream &operator<<(ostream &os, const DirectionalPoint &p) {
     os << "(" << p.y << ", " << p.x << ", " << p.direction << ")";
     return os;
   }
