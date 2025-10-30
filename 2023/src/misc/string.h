@@ -24,6 +24,8 @@ vector<string> split_comma(string input);
 
 vector<string> split_commaspace(string input);
 
+vector<string> split_colonspace(string input);
+
 vector<string> split_space(string input);
 
 vector<string> split_newline(string input);
