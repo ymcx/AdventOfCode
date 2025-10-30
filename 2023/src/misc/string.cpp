@@ -44,6 +44,18 @@ optional<long long> parse_long_long(string input) {
   return stoll(output);
 }
 
+optional<float> parse_float(string input) {
+  optional<long> output = parse_long(input);
+
+  return output.transform([](long i) { return static_cast<float>(i); });
+}
+
+optional<double> parse_double(string input) {
+  optional<long> output = parse_long(input);
+
+  return output.transform([](long i) { return static_cast<double>(i); });
+}
+
 vector<string> split(string input, string delimiter) {
   vector<string> tokens;
   size_t start = 0, end;
