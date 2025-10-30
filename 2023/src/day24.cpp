@@ -72,12 +72,30 @@ int solve_p1(const vector<array<long, 6>> &lines) {
   return intersections;
 }
 
+array<int, 3> get_matching_lines(const vector<array<long, 6>> &lines) {
+  unordered_map<int, vector<int>> frequencies;
+
+  for (int i = 0; i < lines.size(); ++i) {
+    const long y = lines.at(i)[4];
+    vector<int> &frequency = frequencies[y];
+    frequency.push_back(i);
+
+    if (frequency.size() >= 3) {
+      return {frequency[0], frequency[1], frequency[2]};
+    }
+  }
+
+  return {0, 0, 0};
+}
+
 // https://www.reddit.com/user/mynt
 // https://pastebin.com/pnbxaCVu
 long solve_p2(const vector<array<long, 6>> &lines) {
-  const auto &[x0, y0, z0, vx0, vy0, vz0] = lines[72];
-  const auto &[x1, y1, z1, vx1, vy1, vz1] = lines[101];
-  const auto &[x2, y2, z2, vx2, vy2, vz2] = lines[189];
+  const auto [line1, line2, line3] = get_matching_lines(lines);
+
+  const auto &[x0, y0, z0, vx0, vy0, vz0] = lines[line1];
+  const auto &[x1, y1, z1, vx1, vy1, vz1] = lines[line2];
+  const auto &[x2, y2, z2, vx2, vy2, vz2] = lines[line3];
 
   const __int128 vxr1 = vx1 - vx0;
   const __int128 vzr1 = vz1 - vz0;
