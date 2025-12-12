@@ -16,6 +16,26 @@ def get_regions(text):
     return regions
 
 
+def reorder_shapes(text):
+    shapes = text.split("\n\n")[:-1]
+    shapes = [shape.split("\n", 3)[1:] for shape in shapes]
+
+    diagonal, other, c, h = [], [], [], []
+    for i, shape in enumerate(shapes):
+        if (shape[1][0] == "." and shape[1][2] == ".") or (
+            shape[0][1] == "." and shape[2][1] == "."
+        ):
+            h.append(i)
+        elif shape[1][1] == ".":
+            c.append(i)
+        elif "".join(shape).count(".") > 2:
+            diagonal.append(i)
+        else:
+            other.append(i)
+
+    return [diagonal[0], diagonal[1], other[0], other[1], c[0], h[0]]
+
+
 def add(amount, width, height, x, y, max_x):
     y = max(y, height)
 
@@ -43,21 +63,22 @@ def fit(max_x, max_y, regions_3x3, regions_4x3, regions_5x3, regions_4x4):
 
 text = sys.stdin.read()[:-1]
 regions = get_regions(text)
+s1, s2, s3, s4, s5, _ = reorder_shapes(text)
 
 result = 0
 for [max_x, max_y], regions_3x3 in regions:
     i = min(regions_3x3[4], regions_3x3[5])
-    regions_3x3[4] -= i
-    regions_3x3[5] -= i
+    regions_3x3[s1] -= i
+    regions_3x3[s2] -= i
     regions_4x3 = i
 
     i = min(regions_3x3[0], regions_3x3[1])
-    regions_3x3[0] -= i
-    regions_3x3[1] -= i
+    regions_3x3[s3] -= i
+    regions_3x3[s4] -= i
     regions_5x3 = i
 
-    i = regions_3x3[3] // 2
-    regions_3x3[3] -= i * 2
+    i = regions_3x3[s5] // 2
+    regions_3x3[s5] -= i * 2
     regions_4x4 = i
 
     regions_3x3 = sum(regions_3x3)
