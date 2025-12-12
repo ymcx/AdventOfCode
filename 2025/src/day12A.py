@@ -1,86 +1,67 @@
 import sys
-import copy
-
-lines = sys.stdin.read()[:-1].split("\n\n")
-
-shapes = [line.split()[1:] for line in lines[:-1]]
-shapes = [[[item == "#" for item in row] for row in shape] for shape in shapes]
-
-regions = [line.split(": ", 1) for line in lines[-1].split("\n")]
-regions = [
-    [list(map(int, ll.split("x", 1))), list(map(int, region.split()))]
-    for ll, region in regions
-]
-
-def do_they_fit(width,length,region33,region43,region44,region53):
-    region33 = copy.deepcopy(region33)
-    region43 = copy.deepcopy(region43)
-    region44 = copy.deepcopy(region44)
-    region53 = copy.deepcopy(region53)
-
-    ww,ll=0,3
-
-    while region33:
-        for _ in range(region33.pop()):
-            ww += 3
-            if ww>width:
-                ww = 3
-                ll += 3
-
-    while region43:
-        for _ in range(region43.pop()):
-            ww += 4
-            if ww>width:
-                ww = 4
-                ll += 3
-
-    while region53:
-        for _ in range(region53.pop()):
-            ww += 5
-            if ww>width:
-                ww = 5
-                ll += 3
 
 
-    while region44:
-        ll+=1
-        for _ in range(region44.pop()):
-            ww += 4
-            if ww>width:
-                ww = 4
-                ll += 4
+def parse(values):
+    return [int(value) for value in values]
 
 
-        
-    return ww <= width and ll <= length
+def get_regions(text):
+    regions = text.split("\n\n")[-1]
+    regions = [region.split(": ", 1) for region in regions.split("\n")]
+    regions = [
+        (parse(dimensions.split("x", 1)), parse(quantities.split(" ")))
+        for dimensions, quantities in regions
+    ]
 
-count = 0
-for [width, length], region33 in regions:
-    region33 = [i for i in region33]
-    region43 = []
-    region44 = []
-    region53 = []
+    return regions
 
-    r = min(region33[4], region33[5])
-    region33[4] -= r
-    region33[5] -= r
-    region43.append(r)
 
-    r = min(region33[0], region33[1])
-    region33[0] -= r
-    region33[1] -= r
-    region53.append(r)
+def add(amount, width, height, x, y, max_x):
+    y = max(y, height)
 
-    region44.append(region33[3] // 2)
-    region33[3] = region33[3] % 2
+    for _ in range(amount):
+        x += width
 
-    fit = do_they_fit(width,length,region33,region43,region44,region53)
+        if x <= max_x:
+            continue
 
-    print(f"{region33}\t{region43}\t{region44}\t{region53}\t{width}\t{length}\t{fit}")
+        x = width
+        y += height
 
-    if fit:
-        count += 1
+    return x, y
 
-print("33\t\t\t43\t44\t53\twidth\theight\tfit")
-print()
-print(count)
+
+def fit(max_x, max_y, regions_3x3, regions_4x3, regions_5x3, regions_4x4):
+    x, y = 0, 0
+    x, y = add(regions_3x3, 3, 3, x, y, max_x)
+    x, y = add(regions_4x3, 4, 3, x, y, max_x)
+    x, y = add(regions_5x3, 5, 3, x, y, max_x)
+    x, y = add(regions_4x4, 4, 4, x, y, max_x)
+
+    return x <= max_x and y <= max_y
+
+
+text = sys.stdin.read()[:-1]
+regions = get_regions(text)
+
+result = 0
+for [max_x, max_y], regions_3x3 in regions:
+    i = min(regions_3x3[4], regions_3x3[5])
+    regions_3x3[4] -= i
+    regions_3x3[5] -= i
+    regions_4x3 = i
+
+    i = min(regions_3x3[0], regions_3x3[1])
+    regions_3x3[0] -= i
+    regions_3x3[1] -= i
+    regions_5x3 = i
+
+    i = regions_3x3[3] // 2
+    regions_3x3[3] -= i * 2
+    regions_4x4 = i
+
+    regions_3x3 = sum(regions_3x3)
+
+    result += fit(max_x, max_y, regions_3x3, regions_4x3, regions_5x3, regions_4x4)
+
+print(result)
